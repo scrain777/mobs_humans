@@ -1,20 +1,30 @@
 --[[
-    Mobs Humans - Adds human mobs.
-    Copyright (C) 2018  Hamlet
+	Mobs Humans - Adds human mobs.
+	Copyright © 2018-2019 Hamlet <hamlatmesehub@riseup.net>
 
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
+	Licensed under the EUPL, Version 1.2 or – as soon they will be
+	approved by the European Commission – subsequent versions of the
+	EUPL (the "Licence");
+	You may not use this work except in compliance with the Licence.
+	You may obtain a copy of the Licence at:
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+	https://joinup.ec.europa.eu/software/page/eupl
+	https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32017D0863
 
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+	Unless required by applicable law or agreed to in writing,
+	software distributed under the Licence is distributed on an
+	"AS IS" basis,
+	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+	implied.
+	See the Licence for the specific language governing permissions
+	and limitations under the Licence.
+
 --]]
+
+
+-- Used for localization
+
+local S = minetest.get_translator("mobs_humans")
 
 
 --
@@ -26,13 +36,18 @@ if (mob_difficulty == nil) then
 	 mob_difficulty = 1
 end
 
+local show_nametags = minetest.settings:get_bool("mobs_humans_use_nametags")
+if (show_nametags == nil) then
+	show_nametags = true
+end
+
 
 --
 -- Custom bones node
 --
 
 minetest.register_node("mobs_humans:human_bones", {
-	description = "Human Bones",
+	description = S("Human Bones"),
 	drawtype = "mesh",
 	mesh = "mobs_humans_bones_model.obj",
 	tiles = {"mobs_humans_bones.png"},
@@ -69,8 +84,8 @@ minetest.register_node("mobs_humans:human_bones", {
 -- Chat messages
 --
 
-local MESSAGE_1 = "Saluton "
-local MESSAGE_2 = ", mia nomo estas "
+local MESSAGE_1 = S("Saluton ")
+local MESSAGE_2 = S(", mia nomo estas ")
 
 
 --
@@ -491,7 +506,7 @@ end
 --
 
 mobs:register_mob("mobs_humans:human", {
-	--nametag = "Human",
+	nametag = "",
 	given_name = nil,
 	type = nil,
 	hp_min = 15,
@@ -532,7 +547,7 @@ mobs:register_mob("mobs_humans:human", {
 	},
 	visual = "mesh",
 	visual_size = {x = 1, y = 1},
-	collisionbox = {-0.4, -1, -0.4, 0.4, 0.75, 0.4},
+	collisionbox = {-0.3, 0.0, -0.3, 0.3, 1.7, 0.3},
 	textures = {
 		{"mobs_humans_female_01.png"},
 		{"mobs_humans_female_02.png"},
@@ -574,6 +589,12 @@ mobs:register_mob("mobs_humans:human", {
 		self.lava_damage = dps(self, "lava")
 		self.floats = boolean()
 		self.makes_footstep_sound = boolean()
+		if (show_nametags == true) then
+			self.nametag = minetest.colorize("white", self.given_name ..
+				" (" .. S("NPC") .. ")")
+		else
+			self.nametag = ""
+		end
 
 		-- Random values chosen for specific human types
 		if (self.type == "animal") then
@@ -608,6 +629,7 @@ mobs:register_mob("mobs_humans:human", {
 			lava_damage = self.lava_damage,
 			floats = self.floats,
 			makes_footstep_sound = self.makes_footstep_sound,
+			nametag = self.nametag
 		})
 
 		self.object:set_armor_groups({
@@ -726,8 +748,8 @@ mobs:spawn({
 	max_light = 15,
 	min_light = 0,
 	interval = 60,
-	chance = 37500,
-	active_object_count = 1,
+	chance = 7500,
+	active_object_count = 2,
 	min_height = 1,
 	max_height = 240,
 	day_toggle = nil
@@ -735,7 +757,7 @@ mobs:spawn({
 
 -- Spawn Egg
 
-mobs:register_egg("mobs_humans:human", "Spawn Human", "mobs_humans_icon.png")
+mobs:register_egg("mobs_humans:human", S("Spawn Human"), "mobs_humans_icon.png")
 
 
 --
@@ -751,8 +773,8 @@ mobs:alias_mob("mobs:human", "mobs_humans:human")
 
 if (minetest.settings:get("debug_log_level") == nil)
 or (minetest.settings:get("debug_log_level") == "action")
-or	(minetest.settings:get("debug_log_level") == "info")
+or (minetest.settings:get("debug_log_level") == "info")
 or (minetest.settings:get("debug_log_level") == "verbose")
 then
-	minetest.log("action", "[Mod] Mobs Humans [v0.2.2] loaded.")
+	minetest.log("action", "[Mod] Mobs Humans [v0.3.0] loaded.")
 end

@@ -7,7 +7,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
-	- Allow to temporarily hire an human.
+	- No further features planned.
+
+
+
+## [0.3.0] - 2019-10-17
+### Added
+
+	- Support for translations.
+	- Option to toggle hovering nametags.
+
+### Changed
+
+	- License changed to EUPL v1.2.
+	- mod.conf set to follow MT v5.x specifics.
+	- Textures have been optimized (with optipng).
+	- Fixed collisionbox.
+
+### Removed
+
+	- Support for MT v0.4.x
+
 
 
 ## [0.2.2] - 2018-07-27

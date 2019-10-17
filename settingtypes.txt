@@ -1,0 +1,4 @@
+# Display hovering nametags on humans
+#
+# Mostrare targhette fluttuanti sugli umani
+mobs_humans_use_nametags	(Humans use name tags)	bool	true
