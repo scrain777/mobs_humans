@@ -52,3 +52,6 @@ Copyright (C) 2010-2017:
   kaeza
   kilbith
   CloudyProton
+
+mobs_humans_transparent.png by Hamlet - CC0 v1.0 or later.
+

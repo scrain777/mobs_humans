@@ -1,4 +1,24 @@
-# Display hovering nametags on humans
+# ENG: Display hovering nametags on humans.
 #
-# Mostrare targhette fluttuanti sugli umani
-mobs_humans_use_nametags	(Humans use name tags)	bool	true
+# ITA: Mostrare targhette fluttuanti sugli umani.
+mobs_humans_use_nametags	(Humans use name tags)	bool	false
+
+# ENG: Display stats into nametags.
+#
+# ITA: Mostrare le caratteristiche nelle targhette.
+mobs_humans_show_stats		(Visible human stats)	bool	false
+
+# ENG: Send debug informations into chat.
+#
+# ITA: Inviare informazioni di debug nella chat.
+mobs_humans_debug			(Debug info in chat)	bool	false
+
+# ENG: Number of fights to be survived to gain 1 armor point.
+#
+# ITA: Numero di combattimenti da sopravvivere per guadagnare 1 punto armatura.
+mobs_humans_fights_armor	(Fights for 1 armor point)	int	5
+
+# ENG: Number of fights to be survived to gain 1 damage point.
+#
+# ITA: Numero di combattimenti da sopravvivere per guadagnare 1 punto ferimento.
+mobs_humans_fights_damage	(Fights for 1 damage point)	int	10
