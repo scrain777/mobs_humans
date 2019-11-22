@@ -32,10 +32,8 @@ local S = minetest.get_translator('mobs_humans')
 --
 
 mobs_humans.Boolean = function()
-	local i_RandomNumber = PseudoRandom(os.time())
+	local i_RandomNumber = mobs_humans.RandomNumber(0, 1)
 	local b_TrueOrFalse = false
-
-	i_RandomNumber = i_RandomNumber:next(0, 1)
 
 	if (i_RandomNumber == 1) then
 		b_TrueOrFalse = true
@@ -46,16 +44,14 @@ end
 
 
 mobs_humans.BonesTimer = function(pos, a_i_min_seconds, a_i_max_seconds)
-	local i_RandomNumber = PseudoRandom(os.time())
-	i_RandomNumber = i_RandomNumber:next(a_i_min_seconds, a_i_max_seconds)
+	local i_RandomNumber = mobs_humans.RandomNumber(a_i_min_seconds, a_i_max_seconds)
 
 	minetest.get_node_timer(pos):start(i_RandomNumber)
 end
 
 
 mobs_humans.DropBones = function(a_t_position)
-	local i_RandomNumber = PseudoRandom(os.time())
-	i_RandomNumber = i_RandomNumber:next(1, 12)
+	local i_RandomNumber = mobs_humans.RandomNumber(1, 12)
 
 	if (i_RandomNumber <= 6) then
 		local s_NodeName = minetest.get_node(a_t_position).name
@@ -72,6 +68,25 @@ mobs_humans.DropBones = function(a_t_position)
 
 		end
 	end
+end
+
+
+mobs_humans.RandomAttackType = function()
+	local s_AttackName = ''
+	local i_RandomNumber = mobs_humans.RandomNumber(1, 3)
+
+	if (i_RandomNumber == 1) then
+		s_AttackName = 'dogfight'
+
+	elseif (i_RandomNumber == 2) then
+		s_AttackName = 'shoot'
+
+	else
+		s_AttackName = 'dogshoot'
+
+	end
+
+	return s_AttackName
 end
 
 
@@ -98,6 +113,7 @@ mobs_humans.Speak = function(self, clicker)
 	end
 end
 
+
 if (mobs_humans.b_Dynamic == true) then
 
 	mobs_humans.HitFlag = function(self)
@@ -112,11 +128,13 @@ if (mobs_humans.b_Dynamic == true) then
 		end
 	end
 
+
 	mobs_humans.SurvivedFlag = function(self)
 		if (self.i_SurvivedFights == nil) then
 			self.i_SurvivedFights = 0
 		end
 	end
+
 
 	mobs_humans.HurtFlag = function(self)
 		if (self.b_Hurt == nil) then
@@ -128,6 +146,7 @@ if (mobs_humans.b_Dynamic == true) then
 			end
 		end
 	end
+
 
 	mobs_humans.Experience = function(self, dtime)
 
@@ -141,9 +160,6 @@ if (mobs_humans.b_Dynamic == true) then
 				self.f_CooldownTimer = 10
 
 				self.i_SurvivedFights = (self.i_SurvivedFights + 1)
-
-				-- Sheath the sword.
-				mobs_humans.SwordSheath(self)
 
 				if (self.i_SurvivedFights % mobs_humans.i_FIGHTS_DAMAGE == 0) then
 					if (self.damage < (8 * mobs_humans.i_MobDifficulty)) then
@@ -160,17 +176,21 @@ if (mobs_humans.b_Dynamic == true) then
 				if (mobs_humans.b_ShowNametags == true)
 				and (mobs_humans.b_ShowStats == true)
 				then
-					self.nametag = minetest.colorize("white", self.given_name
-					.. " (" .. self.class .. ")" .. "\n"
-					.. S("Armor: ") .. self.armor .. "\n"
-					.. S("Damage: ") .. self.damage .. "\n"
-					.. S("Fights: ") .. self.i_SurvivedFights)
+					local s_NametagColor = mobs_humans.NametagColor(self.armor)
+
+					self.nametag = minetest.colorize(s_NametagColor,
+						self.given_name
+						.. ' (' .. self.class .. ')' .. '\n'
+						.. S('Armor: ') .. self.armor .. '\n'
+						.. S('Damage: ') .. self.damage .. '\n'
+						.. S('Fights: ') .. self.i_SurvivedFights)
 
 					self.object:set_properties({ nametag = self.nametag })
 				end
 			end
 		end
 	end
+
 
 	mobs_humans.Heal = function(self, dtime, a_t_states, a_i_hp, a_f_delay, a_i_max_hp)
 		if (self.b_Hurt ~= nil) then
@@ -209,8 +229,8 @@ if (mobs_humans.b_Dynamic == true) then
 
 							self.object:set_hp(self.health)
 							--[[
-							print(self.given_name .. " healing: " ..
-								self.health .. "/" .. a_i_max_hp)
+							print(self.given_name .. ' healing: ' ..
+								self.health .. '/' .. a_i_max_hp)
 							--]]
 						end
 					end
@@ -220,258 +240,309 @@ if (mobs_humans.b_Dynamic == true) then
 	end
 end
 
-mobs_humans.random_string = function(length)
 
-	local letter = 0
-	local number = 0
-	local initial_letter = true
-	local string = ""
-	local exchanger = ""
-	local forced_choice = ""
-	local vowels = {"a", "e", "i", "o", "u"}
-	local semivowels = {"y", "w"}
+mobs_humans.RandomString = function(a_i_Length)
 
-	local simple_consonants = {
-		"m", "n", "b", "p", "d", "t", "g", "k", "l", "r", "s", "z", "h"
+	local i_Letter = 0
+	local i_Number = 0
+	local b_InitialLetter = true
+	local s_String = ''
+	local s_Exchanger = ''
+	local s_ForcedChoice = ''
+	local t_Vowels = {'a', 'e', 'i', 'o', 'u'}
+	local t_Semivowels = {'y', 'w'}
+
+	local t_SimpleConsonants = {
+		'm', 'n', 'b', 'p', 'd', 't', 'g', 'k', 'l', 'r', 's', 'z', 'h'
 	}
 
-	local compound_consonants = {
-		"ñ", "v", "f", "ð", "þ", "ɣ", "ħ", "ɫ", "ʃ", "ʒ"
+	local t_CompoundConsonants = {
+		'ñ', 'v', 'f', 'ð', 'þ', 'ɣ', 'ħ', 'ɫ', 'ʃ', 'ʒ'
 	}
 
-	local compound_consonants_uppercase = {
-		"Ñ", "V", "F", "Ð", "Þ", "Ɣ", "Ħ", "Ɫ", "Ʃ", "Ʒ"
+	local t_CompoundConsonantsUppercase = {
+		'Ñ', 'V', 'F', 'Ð', 'Þ', 'Ɣ', 'Ħ', 'Ɫ', 'Ʃ', 'Ʒ'
 	}
 
-	local double_consonants = {
-		"mm", "mb", "mp", "mr", "ms", "mz", "mf",
-		"mʃ",
-		"nn", "nd", "nt", "ng", "nk", "nr", "ns", "nz",
-		"nð", "nþ", "nɣ", "nħ", "nʃ", "nʒ",
-		"bb", "bl", "br", "bz",
-		"bʒ",
-		"pp", "pl", "pr", "ps",
-		"pʃ",
-		"dd", "dl", "dr", "dz",
-		"dʒ",
-		"tt", "tl", "tr", "ts",
-		"tʃ",
-		"gg", "gl", "gr", "gz",
-		"gʒ",
-		"kk", "kl", "kr", "ks",
-		"kʃ",
-		"ll", "lm", "ln", "lb", "lp", "ld", "lt", "lg", "lk", "ls", "lz",
-		"lñ", "lv", "lf", "lð", "lþ", "lɣ", "lħ", "lʃ", "lʒ",
-		"rr", "rm", "rn", "rb", "rp", "rd", "rt", "rg", "rk", "rs", "rz",
-		"rñ", "rv", "rf", "rð", "rþ", "rɣ", "rħ", "rʃ", "rʒ",
-		"ss", "sp", "st", "sk",
-		"sf",
-		"zz", "zm", "zn", "zb", "zd", "zg", "zl", "zr",
-		"zñ", "zv",
-		"vl", "vr",
-		"fl", "fr",
-		"ðl", "ðr",
-		"þl", "þr",
-		"ɣl", "ɣr",
-		"ħl", "ħr",
-		"ʃp", "ʃt", "ʃk",
-		"ʃf",
-		"ʒm", "ʒn", "ʒb", "ʒd", "ʒg", "ʒl", "ʒr",
-		"ʒv"
+	local t_DoubleConsonants = {
+		'mm', 'mb', 'mp', 'mr', 'ms', 'mz', 'mf',
+		'mʃ',
+		'nn', 'nd', 'nt', 'ng', 'nk', 'nr', 'ns', 'nz',
+		'nð', 'nþ', 'nɣ', 'nħ', 'nʃ', 'nʒ',
+		'bb', 'bl', 'br', 'bz',
+		'bʒ',
+		'pp', 'pl', 'pr', 'ps',
+		'pʃ',
+		'dd', 'dl', 'dr', 'dz',
+		'dʒ',
+		'tt', 'tl', 'tr', 'ts',
+		'tʃ',
+		'gg', 'gl', 'gr', 'gz',
+		'gʒ',
+		'kk', 'kl', 'kr', 'ks',
+		'kʃ',
+		'll', 'lm', 'ln', 'lb', 'lp', 'ld', 'lt', 'lg', 'lk', 'ls', 'lz',
+		'lñ', 'lv', 'lf', 'lð', 'lþ', 'lɣ', 'lħ', 'lʃ', 'lʒ',
+		'rr', 'rm', 'rn', 'rb', 'rp', 'rd', 'rt', 'rg', 'rk', 'rs', 'rz',
+		'rñ', 'rv', 'rf', 'rð', 'rþ', 'rɣ', 'rħ', 'rʃ', 'rʒ',
+		'ss', 'sp', 'st', 'sk',
+		'sf',
+		'zz', 'zm', 'zn', 'zb', 'zd', 'zg', 'zl', 'zr',
+		'zñ', 'zv',
+		'vl', 'vr',
+		'fl', 'fr',
+		'ðl', 'ðr',
+		'þl', 'þr',
+		'ɣl', 'ɣr',
+		'ħl', 'ħr',
+		'ʃp', 'ʃt', 'ʃk',
+		'ʃf',
+		'ʒm', 'ʒn', 'ʒb', 'ʒd', 'ʒg', 'ʒl', 'ʒr',
+		'ʒv'
 	}
 
-	local double_consonants_uppercase = {
-		"Bl", "Br", "Bz",
-		"Bʒ",
-		"Pl", "Pr", "Ps",
-		"Pʃ",
-		"Dl", "Dr", "Dz",
-		"Dʒ",
-		"Tl", "Tr", "Ts",
-		"Tʃ",
-		"Gl", "Gr", "Gz",
-		"Gʒ",
-		"Kl", "Kr", "Ks",
-		"Kʃ",
-		"Sp", "St", "Sk",
-		"Sf",
-		"Zm", "Zn", "Zb", "Zd", "Zg", "Zl", "Zr",
-		"Zñ", "Zv",
-		"Vl", "Vr",
-		"Fl", "Fr",
-		"Ðl", "Ðr",
-		"Þl", "Þr",
-		"Ɣl", "Ɣr",
-		"Ħl", "Ħr",
-		"Ʃp", "Ʃt", "Ʃk",
-		"Ʃf",
-		"Ʒm", "Ʒn", "Ʒb", "Ʒd", "Ʒg", "Ʒl", "Ʒr",
-		"Ʒv"
+	local t_DoubleConsonantsUppercase = {
+		'Bl', 'Br', 'Bz',
+		'Bʒ',
+		'Pl', 'Pr', 'Ps',
+		'Pʃ',
+		'Dl', 'Dr', 'Dz',
+		'Dʒ',
+		'Tl', 'Tr', 'Ts',
+		'Tʃ',
+		'Gl', 'Gr', 'Gz',
+		'Gʒ',
+		'Kl', 'Kr', 'Ks',
+		'Kʃ',
+		'Sp', 'St', 'Sk',
+		'Sf',
+		'Zm', 'Zn', 'Zb', 'Zd', 'Zg', 'Zl', 'Zr',
+		'Zñ', 'Zv',
+		'Vl', 'Vr',
+		'Fl', 'Fr',
+		'Ðl', 'Ðr',
+		'Þl', 'Þr',
+		'Ɣl', 'Ɣr',
+		'Ħl', 'Ħr',
+		'Ʃp', 'Ʃt', 'Ʃk',
+		'Ʃf',
+		'Ʒm', 'Ʒn', 'Ʒb', 'Ʒd', 'Ʒg', 'Ʒl', 'Ʒr',
+		'Ʒv'
 	}
 
-	local previous_letter = ""
+	local s_PreviousLetter = ''
 
-	for initial_value = 1, length do
+	for i_InitialValue = 1, a_i_Length do
 
-		letter = letter + 1
+		i_Letter = i_Letter + 1
 
-		local chosen_group = math.random(1, 5)
+		--[[
+			1: vowel
+			2: semivowel
+			3: simple consonant
+			4: compound consonant
+			5: double consonant
+		--]]
+		local i_ChosenGroup = math.random(1, 5)
 
-		if (exchanger == "vowel") then
-			chosen_group = math.random(3, 5)
+		-- Previously used group type
+		if (s_Exchanger == 'vowel') then
+			--[[
+				3: simple consonant
+				4: compound consonant
+				5: double consonant
+			--]]
+			i_ChosenGroup = math.random(3, 5)
 
-		elseif (exchanger == "semivowel") then
-			chosen_group = 1
+		elseif (s_Exchanger == 'semivowel') then
+			-- 1: vowel
+			i_ChosenGroup = 1
 
-		elseif (exchanger == "simple consonant") then
-			if (letter < length) then
-				chosen_group = math.random(1, 2)
+		elseif (s_Exchanger == 'simple consonant') then
+			if (i_Letter < a_i_Length) then
+				--[[
+					1: vowel
+					2: semivowel
+				--]]
+				i_ChosenGroup = math.random(1, 2)
 			else
-				chosen_group = 1
+				-- Vowel
+				i_ChosenGroup = 1
 			end
 
-		elseif (exchanger == "compound consonant") then
-			chosen_group = 1
+		elseif (s_Exchanger == 'compound consonant') then
+			-- Vowel
+			i_ChosenGroup = 1
 
-		elseif (exchanger == "double consonant") then
-			chosen_group = 1
+		elseif (s_Exchanger == 'double consonant') then
+			-- Vowel
+			i_ChosenGroup = 1
 
 		end
 
+		-- Vowels
+		if (i_ChosenGroup == 1) then
 
-		if (chosen_group == 1) then
+			-- Uppercase vowel
+			if (b_InitialLetter == true) then
+				b_InitialLetter = false
+				i_Number = math.random(1, #t_Vowels)
+				s_PreviousLetter = string.upper(t_Vowels[i_Number])
+				s_String = s_String .. s_PreviousLetter
 
-			if (initial_letter == true) then
-				initial_letter = false
-				number = math.random(1, 5)
-				previous_letter = string.upper(vowels[number])
-				string = string .. previous_letter
-
+			-- Lowercase vowel
 			else
-				number = math.random(0, 1) -- single or double vowel
+				i_Number = math.random(0, 1) -- single or double vowel
 
-				if (number == 0) then
-					number = math.random(1, 5)
-					previous_letter = vowels[number]
-					string = string .. previous_letter
+				if (i_Number == 0) then
+					i_Number = math.random(1, #t_Vowels)
+					s_PreviousLetter = t_Vowels[i_Number]
+					s_String = s_String .. s_PreviousLetter
 
 				else
-					number = math.random(1, 5)
-					previous_letter = vowels[number]
-					string = string .. previous_letter
+					i_Number = math.random(1, #t_Vowels)
+					s_PreviousLetter = t_Vowels[i_Number]
+					s_String = s_String .. s_PreviousLetter
 
-					number = math.random(1, 5)
-					previous_letter = vowels[number]
-					string = string .. previous_letter
+					i_Number = math.random(1, #t_Vowels)
+					s_PreviousLetter = t_Vowels[i_Number]
+					s_String = s_String .. s_PreviousLetter
 
 				end
 			end
 
-			exchanger = "vowel"
+			s_Exchanger = 'vowel'
 
+		-- Semivowels
+		elseif (i_ChosenGroup == 2) then
 
-		elseif (chosen_group == 2) then
+			i_Number = math.random(1, 2) -- single or double semivowel
 
-			number = math.random(1, 2)
+			-- Uppercase semivowel
+			if (i_Letter ~= 2) then
+				if (b_InitialLetter == true) then
+					b_InitialLetter = false
+					s_PreviousLetter = string.upper(t_Semivowels[i_Number])
+					s_String = s_String .. s_PreviousLetter
 
-			if (letter ~= 2) then
-				if (initial_letter == true) then
-					initial_letter = false
-					previous_letter = string.upper(semivowels[number])
-					string = string .. previous_letter
+				-- Lowercase semivowel
 				else
-					previous_letter = semivowels[number]
-					string = string .. previous_letter
+					s_PreviousLetter = t_Semivowels[i_Number]
+					s_String = s_String .. s_PreviousLetter
 
 				end
 
-				exchanger = "semivowel"
+				s_Exchanger = 'semivowel'
 
-			elseif (letter == 2) then
-				if (previous_letter == "L") or (previous_letter == "R")
-				or (previous_letter == "Ɫ") or (previous_letter == "Y")
-				or (previous_letter == "W") or (previous_letter == "H") then
-					if (number == 1) then
-						previous_letter = "i"
-						string = string .. previous_letter
+			-- Lowercase semivowel
+			elseif (i_Letter == 2) then
+				if (s_PreviousLetter == 'L') or (s_PreviousLetter == 'R')
+				or (s_PreviousLetter == 'Ɫ') or (s_PreviousLetter == 'Y')
+				or (s_PreviousLetter == 'W') or (s_PreviousLetter == 'H')
+				then
+					if (i_Number == 1) then
+						s_PreviousLetter = 'i'
+						s_String = s_String .. s_PreviousLetter
 
-					elseif (number == 2) then
-						previous_letter = "u"
-						string = string .. previous_letter
+					elseif (i_Number == 2) then
+						s_PreviousLetter = 'u'
+						s_String = s_String .. s_PreviousLetter
 
 					end
 				end
 
-				exchanger = "vowel"
+				s_Exchanger = 'vowel'
 			end
 
+		-- Simple consonants
+		elseif (i_ChosenGroup == 3) then
 
-		elseif (chosen_group == 3) then
+			i_Number = math.random(1, #t_SimpleConsonants)
 
-			number = math.random(1, 13)
+			-- Uppercase consonant
+			if (b_InitialLetter == true) then
+				b_InitialLetter = false
+				s_PreviousLetter = string.upper(t_SimpleConsonants[i_Number])
+				s_String = s_String .. s_PreviousLetter
 
-			if (initial_letter == true) then
-				initial_letter = false
-				previous_letter = string.upper(simple_consonants[number])
-				string = string .. previous_letter
-
+			-- Lowercase consonant
 			else
-				previous_letter = simple_consonants[number]
-				string = string .. previous_letter
+				s_PreviousLetter = t_SimpleConsonants[i_Number]
+				s_String = s_String .. s_PreviousLetter
 
 			end
 
-			exchanger = "simple consonant"
+			s_Exchanger = 'simple consonant'
 
+		-- Compound consonants
+		elseif (i_ChosenGroup == 4) then
 
-		elseif (chosen_group == 4) then
+			i_Number = math.random(1, #t_CompoundConsonantsUppercase)
 
-			number = math.random(1, 10)
+			-- Uppercase compound consonant
+			if (b_InitialLetter == true) then
+				b_InitialLetter = false
+				s_PreviousLetter = t_CompoundConsonantsUppercase[i_Number]
+				s_String = s_String .. s_PreviousLetter
 
-			if (initial_letter == true) then
-				initial_letter = false
-				previous_letter = compound_consonants_uppercase[number]
-				string = string .. previous_letter
-
+			-- Lowercase compound consonant
 			else
-				previous_letter = compound_consonants[number]
-				string = string .. previous_letter
+				s_PreviousLetter = t_CompoundConsonants[i_Number]
+				s_String = s_String .. s_PreviousLetter
 			end
 
-			exchanger = "compound consonant"
+			s_Exchanger = 'compound consonant'
 
+		-- Double consonants
+		elseif (i_ChosenGroup == 5) then
 
-		elseif (chosen_group == 5) then
+			-- Uppercase double consonant
+			if (b_InitialLetter == true) then
+				b_InitialLetter = false
+				i_Number = math.random(1, #t_DoubleConsonantsUppercase)
+				s_PreviousLetter = t_DoubleConsonantsUppercase[i_Number]
+				s_String = s_String .. s_PreviousLetter
 
-			if (initial_letter == true) then
-				initial_letter = false
-				number = math.random(1, 61)
-				previous_letter = double_consonants_uppercase[number]
-				string = string .. previous_letter
-
+			-- Lowercase double consonant
 			else
-				number = math.random(1, 131)
-				previous_letter = double_consonants[number]
-				string = string .. previous_letter
+				i_Number = math.random(1, #t_DoubleConsonants)
+				s_PreviousLetter = t_DoubleConsonants[i_Number]
+				s_String = s_String .. s_PreviousLetter
 			end
 
-			exchanger = "double consonant"
+			s_Exchanger = 'double consonant'
 
 		end
 	end
 
-	initial_letter = true
+	b_InitialLetter = true
 
-	return string
+	return s_String
 end
+
 
 mobs_humans.OnSpawnNormal = function(self)
 	self.class = self.type
 
-	self.given_name = mobs_humans.random_string(math.random(2, 5))
+	self.floats = mobs_humans.Boolean()
+	self.attack_animals = mobs_humans.Boolean()
+	self.group_attack = mobs_humans.Boolean()
+	self.attack_type = mobs_humans.RandomAttackType()
 
-	self.nametag = minetest.colorize("white", self.given_name ..
-		" (" .. self.class .. ")")
+	if (self.class == 'animal') then
+		self.passive = mobs_humans.Boolean()
+		self.runaway = mobs_humans.Boolean()
+		self.attack_animals = mobs_humans.Boolean()
+	end
+
+	self.given_name = mobs_humans.RandomString(mobs_humans.RandomNumber(2, 5))
+
+	if (self.armor ~= 100) then
+		self.armor = 100
+	end
+
+	self.nametag = minetest.colorize('white', self.given_name ..
+		' (' .. self.class .. ')')
 
 	local t_Appearence = {'', '', '', ''}
 
@@ -491,10 +562,132 @@ mobs_humans.OnSpawnNormal = function(self)
 	})
 end
 
+
 if (mobs_humans.b_Dynamic == true) then
 
-	mobs_humans.RandomSword = function(a_b_RealisticChance)
-		local i_RandomNumber = nil
+	mobs_humans.NametagColor = function(a_i_armor)
+		local s_White = '#00FF00'
+		local s_Green = '#00FF00'
+		local s_Yellow = '#FFFF00'
+		local s_Orange = '#FF8000'
+		local s_Red = '#FF0000'
+		local s_Blue = '#0000FF'
+		local s_Indigo = '#4B0082'
+		local s_Violet = '#8000FF'
+		local s_ColorToAppy = ''
+
+		if (a_i_armor <= 100) and (a_i_armor >= 90) then
+			s_ColorToAppy = s_White
+
+		elseif (a_i_armor < 90) and (a_i_armor >= 80) then
+			s_ColorToAppy = s_Green
+
+		elseif (a_i_armor < 80) and (a_i_armor >= 70) then
+			s_ColorToAppy = s_Yellow
+
+		elseif (a_i_armor < 70) and (a_i_armor >= 60) then
+			s_ColorToAppy = s_Orange
+
+		elseif (a_i_armor < 60) and (a_i_armor >= 50) then
+			s_ColorToAppy = s_Red
+
+		elseif (a_i_armor < 40) and (a_i_armor >= 30) then
+			s_ColorToAppy = s_Blue
+
+		elseif (a_i_armor < 30) and (a_i_armor >= 20) then
+			s_ColorToAppy = s_Indigo
+
+		elseif (a_i_armor < 20) and (a_i_armor >= 10) then
+			s_ColorToAppy = s_Violet
+
+		end
+
+		return s_ColorToAppy
+	end
+
+
+	mobs_humans.RandomArmorLevel = function()
+		local i_RandomNumber = mobs_humans.RandomNumber(1, 100)
+		local i_ChosenLevel = nil
+
+		--[[
+			These percentages have been collected using Ores Stats
+			Mapgen = flat
+			Map seed = 0123456789
+			Letting the character in autowalk from surface to -31000.
+
+			The ore's percentages sum is 50.476%
+			Stone and wood percentages have been arbitrarily set:
+			(100% - 50.476%) = 49.524% -- To be assigned.
+			(49.524% / 6) = 8.254% -- Allows the following:
+
+			Stone's percentage = Twice the wood's percentage
+			Stone is everywhere, wood might be harder to find.
+
+			Stone = (8.254% * 4) = 33.016%
+			Wood = (8.254% * 2) = 16.508%
+
+			(33.016% + 16.508%) = 49.524% -- Assigned.
+
+			Ores + (Wood + Stone) = 50.476% + 49.524% = 100% Assigned.
+		--]]
+
+		-- These values have been rounded to integers due the fact
+		-- that the pseudorandom number generator only produces integers.
+
+		local i_DIAMOND_ORE_PERCENTAGE = 2
+		-- Actually 1.545
+
+		local i_MESE_ORE_PERCENTAGE = 3
+		-- Actually 2.818
+
+		local i_COPPER_ORE_PERCENTAGE = 14
+		-- Actually 13.796, used for 'bronze'.
+
+		local i_WOOD_PERCENTAGE = 17
+		-- Actually 16.508
+
+		local i_IRON_ORE_PERCENTAGE = 32
+		-- Actually 32.317, used for 'steel'.
+
+		local i_STONE_PERCENTAGE = 33
+		-- Actually 33.016
+
+
+		if (i_RandomNumber <= i_DIAMOND_ORE_PERCENTAGE) then
+			i_ChosenLevel = mobs_humans.RandomNumber(10, 24)
+
+		elseif (i_RandomNumber > i_DIAMOND_ORE_PERCENTAGE)
+		and (i_RandomNumber <= i_MESE_ORE_PERCENTAGE)
+		then
+			i_ChosenLevel = mobs_humans.RandomNumber(25, 39)
+
+		elseif (i_RandomNumber > i_MESE_ORE_PERCENTAGE)
+		and (i_RandomNumber <= i_COPPER_ORE_PERCENTAGE)
+		then
+			i_ChosenLevel = mobs_humans.RandomNumber(40, 54)
+
+		elseif (i_RandomNumber > i_COPPER_ORE_PERCENTAGE)
+		and (i_RandomNumber <= i_WOOD_PERCENTAGE)
+		then
+			i_ChosenLevel = mobs_humans.RandomNumber(55, 69)
+
+		elseif (i_RandomNumber > i_WOOD_PERCENTAGE)
+		and (i_RandomNumber <= i_IRON_ORE_PERCENTAGE)
+		then
+			i_ChosenLevel = mobs_humans.RandomNumber(70, 84)
+
+		else
+			i_ChosenLevel = mobs_humans.RandomNumber(85, 100)
+
+		end
+
+		return i_ChosenLevel
+	end
+
+
+	mobs_humans.RandomSword = function()
+		local i_RandomNumber = mobs_humans.RandomNumber(1, 100)
 		local t_ChosenSword = {}
 
 		local t_DefaultSwords = {
@@ -535,89 +728,81 @@ if (mobs_humans.b_Dynamic == true) then
 			}
 		}
 
+		--[[
+			These percentages have been collected using Ores Stats
+			Mapgen = flat
+			Map seed = 0123456789
+			Letting the character in autowalk from surface to -31000.
+
+			The ore's percentages sum is 50.476%
+			Stone and wood percentages have been arbitrarily set:
+			(100% - 50.476%) = 49.524% -- To be assigned.
+			(49.524% / 6) = 8.254% -- Allows the following:
+
+			Stone's percentage = Twice the wood's percentage
+			Stone is everywhere, wood might be harder to find.
+
+			Stone = (8.254% * 4) = 33.016%
+			Wood = (8.254% * 2) = 16.508%
+
+			(33.016% + 16.508%) = 49.524% -- Assigned.
+
+			Ores + (Wood + Stone) = 50.476% + 49.524% = 100% Assigned.
+		--]]
+
+		-- These values have been rounded to integers due the fact
+		-- that the pseudorandom number generator only produces integers.
+
+		local i_DIAMOND_ORE_PERCENTAGE = 2
+		-- Actually 1.545
+
+		local i_MESE_ORE_PERCENTAGE = 3
+		-- Actually 2.818
+
+		local i_COPPER_ORE_PERCENTAGE = 14
+		-- Actually 13.796, used for 'bronze'.
+
+		local i_WOOD_PERCENTAGE = 17
+		-- Actually 16.508
+
+		local i_IRON_ORE_PERCENTAGE = 32
+		-- Actually 32.317, used for 'steel'.
+
+		local i_STONE_PERCENTAGE = 33
+		-- Actually 33.016
 
 
-		if (a_b_RealisticChance ~= true) then
-			t_ChosenSword = t_DefaultSwords[math.random(1, 6)]
+		if (i_RandomNumber <= i_DIAMOND_ORE_PERCENTAGE) then
+			t_ChosenSword = t_DefaultSwords[6] -- Diamond sword.
+
+		elseif (i_RandomNumber > i_DIAMOND_ORE_PERCENTAGE)
+		and (i_RandomNumber <= i_MESE_ORE_PERCENTAGE)
+		then
+			t_ChosenSword = t_DefaultSwords[5] -- Mese sword.
+
+		elseif (i_RandomNumber > i_MESE_ORE_PERCENTAGE)
+		and (i_RandomNumber <= i_COPPER_ORE_PERCENTAGE)
+		then
+			t_ChosenSword = t_DefaultSwords[3] -- Copper sword.
+
+		elseif (i_RandomNumber > i_COPPER_ORE_PERCENTAGE)
+		and (i_RandomNumber <= i_WOOD_PERCENTAGE)
+		then
+			t_ChosenSword = t_DefaultSwords[1] -- Wooden sword.
+
+		elseif (i_RandomNumber > i_WOOD_PERCENTAGE)
+		and (i_RandomNumber <= i_IRON_ORE_PERCENTAGE)
+		then
+			t_ChosenSword = t_DefaultSwords[4] -- Steel sword.
 
 		else
-			--[[
-				These percentages have been collected using Ores Stats
-				Mapgen = flat
-				Map seed = 0123456789
-				Letting the character in autowalk from surface to -31000.
+			t_ChosenSword = t_DefaultSwords[2] -- Stone sword.
 
-				The ore's percentages sum is 50.476%
-				Stone and wood percentages have been arbitrarily set:
-				(100% - 50.476%) = 49.524% -- To be assigned.
-				(49.524% / 6) = 8.254% -- Allows the following:
-
-				Stone's percentage = Twice the wood's percentage
-				Stone is everywhere, wood might be harder to find.
-
-				Stone = (8.254% * 4) = 33.016%
-				Wood = (8.254% * 2) = 16.508%
-
-				(33.016% + 16.508%) = 49.524% -- Assigned.
-
-				Ores + (Wood + Stone) = 50.476% + 49.524% = 100% Assigned.
-			--]]
-
-			-- These values have been rounded to integers due the fact
-			-- that the pseudorandom number generator only produces integers.
-
-			local i_DIAMOND_ORE_PERCENTAGE = 2
-			-- Actually 1.545
-
-			local i_MESE_ORE_PERCENTAGE = 3
-			-- Actually 2.818
-
-			local i_COPPER_ORE_PERCENTAGE = 14
-			-- Actually 13.796, used for 'bronze'.
-
-			local i_WOOD_PERCENTAGE = 17
-			-- Actually 16.508
-
-			local i_IRON_ORE_PERCENTAGE = 32
-			-- Actually 32.317, used for 'steel'.
-
-			local i_STONE_PERCENTAGE = 33
-			-- Actually 33.016
-
-			i_RandomNumber = PseudoRandom(os.time())
-			i_RandomNumber = i_RandomNumber:next(1, 100)
-
-			if (i_RandomNumber <= i_DIAMOND_ORE_PERCENTAGE) then
-				t_ChosenSword = t_DefaultSwords[6] -- Diamond sword.
-
-			elseif (i_RandomNumber > i_DIAMOND_ORE_PERCENTAGE)
-			and (i_RandomNumber <= i_MESE_ORE_PERCENTAGE)
-			then
-				t_ChosenSword = t_DefaultSwords[5] -- Mese sword.
-
-			elseif (i_RandomNumber > i_MESE_ORE_PERCENTAGE)
-			and (i_RandomNumber <= i_COPPER_ORE_PERCENTAGE)
-			then
-				t_ChosenSword = t_DefaultSwords[3] -- Copper sword.
-
-			elseif (i_RandomNumber > i_COPPER_ORE_PERCENTAGE)
-			and (i_RandomNumber <= i_WOOD_PERCENTAGE)
-			then
-				t_ChosenSword = t_DefaultSwords[1] -- Wooden sword.
-
-			elseif (i_RandomNumber > i_WOOD_PERCENTAGE)
-			and (i_RandomNumber <= i_IRON_ORE_PERCENTAGE)
-			then
-				t_ChosenSword = t_DefaultSwords[4] -- Steel sword.
-
-			else
-				t_ChosenSword = t_DefaultSwords[2] -- Stone sword.
-
-			end
 		end
 
 		return t_ChosenSword
 	end
+
 
 	mobs_humans.UpdateWeaponTexture = function(self, a_i_damage)
 		local s_WeaponTexture = 'mobs_humans_transparent.png'
@@ -631,8 +816,7 @@ if (mobs_humans.b_Dynamic == true) then
 		elseif (a_i_damage >= 6) and (a_i_damage < 7) then
 			s_WeaponTexture = 'default_tool_bronzesword.png'
 
-			local i_RandomNumber = PseudoRandom(os.time())
-			i_RandomNumber = i_RandomNumber:next(0, 1)
+			local i_RandomNumber = mobs_humans.RandomNumber(0, 1)
 
 			if (i_RandomNumber == 1) then
 				s_WeaponTexture = 'default_tool_steelsword.png'
@@ -655,6 +839,7 @@ if (mobs_humans.b_Dynamic == true) then
 		})
 	end
 
+
 	mobs_humans.SwordSheath = function(self)
 		if (self.textures[3] ~= 'mobs_humans_transparent.png') then
 			self.textures[3] = 'mobs_humans_transparent.png'
@@ -667,6 +852,7 @@ if (mobs_humans.b_Dynamic == true) then
 		end
 	end
 
+
 	mobs_humans.OnSpawnDynamic = function(self)
 		-- Set the initial 'b_Hurt' flag.
 		mobs_humans.HurtFlag(self)
@@ -677,16 +863,35 @@ if (mobs_humans.b_Dynamic == true) then
 
 		self.class = self.type
 
-		self.given_name = mobs_humans.random_string(math.random(2, 5))
+		self.floats = mobs_humans.Boolean()
+		self.attack_animals = mobs_humans.Boolean()
+		self.group_attack = mobs_humans.Boolean()
+		self.attack_type = mobs_humans.RandomAttackType()
 
-		self.nametag = minetest.colorize("white", self.given_name ..
-			" (" .. self.class .. ")")
+		if (self.class == 'animal') then
+			self.passive = mobs_humans.Boolean()
+			self.runaway = mobs_humans.Boolean()
+			self.attack_animals = mobs_humans.Boolean()
+		end
 
-		self.initial_hp = math.random(self.hp_min, self.hp_max)
+		if (self.class == 'monster') then
+			self.docile_by_day = mobs_humans.Boolean()
+		end
+
+		self.armor = mobs_humans.RandomArmorLevel()
+
+		self.given_name = mobs_humans.RandomString(mobs_humans.RandomNumber(2, 5))
+
+		local s_NametagColor = mobs_humans.NametagColor(self.armor)
+
+		self.nametag = minetest.colorize(s_NametagColor, self.given_name ..
+			' (' .. self.class .. ')')
+
+		self.initial_hp = mobs_humans.RandomNumber(self.hp_min, self.hp_max)
 
 		self.object:set_hp(self.initial_hp)
 
-		self.weapon = mobs_humans.RandomSword(true)
+		self.weapon = mobs_humans.RandomSword()
 
 		self.damage = self.weapon.i_Damage
 
@@ -709,33 +914,51 @@ if (mobs_humans.b_Dynamic == true) then
 	end
 end
 
+
 mobs_humans.Nametag = function(self)
 	if (mobs_humans.b_ShowNametags == false) then
-		self.nametag = ""
+		self.nametag = ''
 		self.object:set_properties({ nametag = self.nametag })
 
 	else
 		if (mobs_humans.b_ShowStats == false) then
-			self.nametag = minetest.colorize("white", self.given_name
-			.. " (" .. self.class .. ")")
-
-			self.object:set_properties({ nametag = self.nametag })
-
-		else
 			if (mobs_humans.b_Dynamic == true) then
-				self.nametag = minetest.colorize("white", self.given_name
-				.. " (" .. self.class .. ")" .. "\n"
-				.. S("Armor: ") .. self.armor .. "\n"
-				.. S("Damage: ") .. self.damage .. "\n"
-				.. S("Fights: ") .. self.i_SurvivedFights)
+				local s_NametagColor = mobs_humans.NametagColor(self.armor)
+
+				self.nametag = minetest.colorize(s_NametagColor,
+					self.given_name	.. ' (' .. self.class .. ')')
 
 				self.object:set_properties({ nametag = self.nametag })
 
 			else
-				self.nametag = minetest.colorize("white", self.given_name
-				.. " (" .. self.class .. ")" .. "\n"
-				.. S("Armor: ") .. self.armor .. "\n"
-				.. S("Damage: ") .. self.damage)
+				self.nametag = minetest.colorize('white',
+					self.given_name	.. ' (' .. self.class .. ')')
+
+				self.object:set_properties({ nametag = self.nametag })
+
+			end
+
+		else
+			if (mobs_humans.b_Dynamic == true) then
+				local s_NametagColor = mobs_humans.NametagColor(self.armor)
+
+				self.nametag = minetest.colorize(s_NametagColor,
+					self.given_name
+					.. ' (' .. self.class .. ')' .. '\n'
+					.. S('Armor: ') .. self.armor .. '\n'
+					.. S('Damage: ') .. self.damage .. '\n'
+					.. S('Attack: ') .. self.attack_type .. '\n'
+					.. S('Fights: ') .. self.i_SurvivedFights)
+
+				self.object:set_properties({ nametag = self.nametag })
+
+			else
+				self.nametag = minetest.colorize('white',
+					self.given_name
+					.. ' (' .. self.class .. ')' .. '\n'
+					.. S('Armor: ') .. self.armor .. '\n'
+					.. S('Damage: ') .. self.damage ..  '\n'
+					.. S('Attack: ') .. self.attack_type)
 
 				self.object:set_properties({ nametag = self.nametag })
 			end
@@ -743,17 +966,74 @@ mobs_humans.Nametag = function(self)
 	end
 end
 
+--[[
+
+	Attribution: 'Limit' and 'Calcule Punch Damage' have been taken
+	from 'Creatures MOB-Engine (cme)', on_hitted.lua, by
+	Copyright (C) 2017 Mob API Developers and Contributors
+	Copyright (C) 2015-2016 BlockMen <blockmen2015@gmail.com>
+
+	From the Creatures MOB-Engine (cme) ZLib License (paragraph 1):
+	"If you use this software in a product, an acknowledgment in the
+	product documentation is required."
+
+	Further informations:
+	See also 'Entity damage mechanism' (../minetest/doc/lua_api.txt)
+
+--]]
+
+-- Limit
+local function limit(value, min, max)
+	if value < min then
+		return min
+	end
+	if value > max then
+		return max
+	end
+	return value
+end
+
+
+-- Calcule Punch Damage
+local function calcPunchDamage(obj, actual_interval, tool_caps)
+	local damage = 0
+	if not tool_caps or not actual_interval then
+		return 0
+	end
+	local my_armor = obj:get_armor_groups() or {}
+	for group,_ in pairs(tool_caps.damage_groups) do
+		damage = damage + (tool_caps.damage_groups[group] or 0) *
+			limit(actual_interval / tool_caps.full_punch_interval, 0.0, 1.0) *
+			((my_armor[group] or 0) / 100.0)
+	end
+	return damage or 0
+end
+
 mobs_humans.NametagDebug = function(self, hitter, time_from_last_punch,
 	tool_capabilities, direction)
+
+	--[[
+	print('Self: ' .. dump(self))
+	print('Hitter: ' .. dump(hitter))
+	print('Time from last punch: ' .. dump(time_from_last_punch))
+	print('Tool capabilities: ' .. dump(tool_capabilities))
+	print('Direction: ' .. dump(direction))
+	--]]
 
 	local s_MobName = self.given_name
 	local i_MobArmor = self.armor
 	local s_PlayerName = hitter:get_player_name()
 	local i_PlayerDamage = tool_capabilities.damage_groups.fleshy
+	local i_ActualDamage = calcPunchDamage(self.object,
+		time_from_last_punch, tool_capabilities)
 
-	local s_Message = s_MobName .. " hit by " .. s_PlayerName
-		.. "\n" .. "Weapon damage: "
-		.. minetest.colorize("red", i_PlayerDamage)
+	local s_Message = s_MobName .. ' hit by ' .. s_PlayerName
+		.. '\n' .. 'Armor level: '
+		.. minetest.colorize('red', i_MobArmor)
+		.. '\n' .. 'Weapon damage: '
+		.. minetest.colorize('red', i_PlayerDamage)
+		.. '\n' .. 'Effective damage: '
+		.. minetest.colorize('red', i_ActualDamage)
 
 	minetest.chat_send_player(s_PlayerName, s_Message)
 end

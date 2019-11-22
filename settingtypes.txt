@@ -1,3 +1,8 @@
+# ENG: Whether if mobs can heal and gain experience.
+#
+# ITA: Se i mob possono guarire e guadagnare esperienza.
+mobs_humans_dynamic	(Humans heal and gain experience)	bool	false
+
 # ENG: Display hovering nametags on humans.
 #
 # ITA: Mostrare targhette fluttuanti sugli umani.

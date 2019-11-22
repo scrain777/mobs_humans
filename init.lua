@@ -98,8 +98,10 @@ mobs_humans.t_Skins = {
 
 dofile(s_ModPath .. '/functions.lua')
 dofile(s_ModPath .. '/node.lua')
-dofile(s_ModPath .. '/npc.lua')
 dofile(s_ModPath .. '/projectile.lua')
+dofile(s_ModPath .. '/animal.lua')
+dofile(s_ModPath .. '/monster.lua')
+dofile(s_ModPath .. '/npc.lua')
 
 
 --

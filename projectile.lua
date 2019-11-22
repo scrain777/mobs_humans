@@ -30,7 +30,7 @@ mobs:register_arrow('mobs_humans:stone', {
 	visual = 'sprite',
 	visual_size = {x = 0.1, y = 0.1},
 	textures = {'default_stone.png'},
-	velocity = 9,
+	velocity = 18,
 	hit_player = function(self, player)
 		player:punch(self.object, 1,
 			{
@@ -38,6 +38,17 @@ mobs:register_arrow('mobs_humans:stone', {
 				damage_groups = {fleshy = 6},
 			}
 		)
+		self.object:remove()
+	end,
+
+	hit_mob = function(self, player)
+		player:punch(self.object, 1,
+			{
+				full_punch_interval = 0.1,
+				damage_groups = {fleshy = 6},
+			}
+		)
+		self.object:remove()
 	end,
 
 	hit_node = function(self, pos, node)

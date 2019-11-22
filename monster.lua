@@ -31,9 +31,9 @@ local S = minetest.get_translator('mobs_humans')
 -- Entity definition
 --
 
-mobs:register_mob('mobs_humans:human_npc', {
+mobs:register_mob('mobs_humans:human_animal', {
 	nametag = 'Human',
-	type = 'npc',
+	type = 'monster',
 	hp_min = 15,
 	hp_max = 20,
 	armor = 100,
@@ -42,7 +42,7 @@ mobs:register_mob('mobs_humans:human_npc', {
 	stand_chance = 50,
 	walk_chance = 50,
 	jump = true,
-	jump_height= 1.1,
+	jump_height = 1.1,
 	stepheight = 1.1,
 	pushable = true,
 	view_range = 14,
@@ -50,14 +50,14 @@ mobs:register_mob('mobs_humans:human_npc', {
 	knock_back = true,
 	fear_height = 3,
 	fall_damage = true,
-	lava_damage = 9999,
 	suffocation = true,
 	floats = false,
 	reach = 4,
-	attack_chanche = 12,
+	docile_by_day = true,
+	attack_chance = 12,
 	attack_monsters = true,
 	attack_animals = false,
-	attack_npcs = false,
+	attack_npcs = true,
 	attack_players = true,
 	group_attack = false,
 	attack_type = 'dogfight',
@@ -178,10 +178,10 @@ mobs:register_mob('mobs_humans:human_npc', {
 --
 
 mobs:spawn({
-	name = 'mobs_humans:human_npc',
+	name = 'mobs_humans:human_monster',
 	nodes = {'group:crumbly'},
 	neighbors = {'air'},
-	chance = 60000,
+	chance = 6000,
 	active_object_count = 1,
 	min_height = 1,
 	max_height = 240
@@ -190,10 +190,10 @@ mobs:spawn({
 
 -- Spawn Egg
 
-mobs:register_egg('mobs_humans:human_npc', S('Spawn Human NPC'),
+mobs:register_egg('mobs_humans:human_monster', S('Spawn Human Monster'),
 	'mobs_humans_icon.png')
 
 
 -- Alias
 
-mobs:alias_mob('mobs:human_npc', 'mobs_humans:human_npc')
+mobs:alias_mob('mobs:human_monster', 'mobs_humans:human_monster')
