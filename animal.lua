@@ -67,7 +67,7 @@ mobs:register_mob('mobs_humans:human_animal', {
 	dogshoot_count_max = 9,
 	dogshoot_count2_max = 5,
 	shoot_interval = 3,
-	shoot_offset = 1.5,
+	shoot_offset = 1.7,
 	runaway_from = {
 		'mobs_banshee:banshee',
 		'mobs_ghost_redo:ghost',
@@ -180,7 +180,7 @@ mobs:spawn({
 	name = 'mobs_humans:human_animal',
 	nodes = {'group:crumbly'},
 	neighbors = {'air'},
-	chance = 60000,
+	chance = mobs_humans.i_SpawnChance,
 	active_object_count = 1,
 	min_height = 1,
 	max_height = 240

@@ -1,10 +1,16 @@
 # textdomain:mobs_humans
 
-Human Bones=Ossa umane
 Saluton =Salute 
 , mia nomo estas =, il mio nome è 
-
-# Non Playing Character = Personaggio Non Giocante
-NPC=PNG
-
-Spawn Human=Crea umano
+Armor: =Armatura: 
+Damage: =Danno: 
+Fights: =Combattimenti: 
+Attack: =Attacco: 
+ hit by = colpito da 
+Armor level: =Livello armatura: 
+Weapon damage: =Danno arma: 
+Effective damage: =Danno effettivo: 
+Spawn Human Monster=Genera umano mostro
+Spawn Human Animal=Genera umano animale
+Human Bones=Ossa umane
+Spawn Human NPC=Genera umano PNG

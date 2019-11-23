@@ -38,6 +38,11 @@ if (mobs_humans.i_MobDifficulty == nil) then
 	mobs_humans.i_MobDifficulty = 1
 end
 
+mobs_humans.i_SpawnChance = minetest.settings:get('mobs_humans_spawn_chance')
+if (mobs_humans.i_SpawnChance == nil) then
+	mobs_humans.i_SpawnChance = 60000
+end
+
 mobs_humans.b_Dynamic = minetest.settings:get_bool('mobs_humans_dynamic')
 if (mobs_humans.b_Dynamic == nil) then
 	mobs_humans.b_Dynamic = false
@@ -76,6 +81,13 @@ if (mobs_humans.b_Dynamic == true) then
 
 	if (mobs_humans.i_FIGHTS_DAMAGE == nil) then
 		mobs_humans.i_FIGHTS_DAMAGE = 10
+	end
+
+	-- Whether if armors and weapons levels must be completely random
+	-- or based on realistic chance.
+	mobs_humans.b_REALISTIC_CHANCE = minetest.settings:get_bool('mobs_humans_realistic_chance')
+	if (mobs_humans.b_REALISTIC_CHANCE == nil) then
+		mobs_humans.b_REALISTIC_CHANCE = true
 	end
 end
 

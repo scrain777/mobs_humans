@@ -1,7 +1,19 @@
+# ENG: Spawn chance.
+#
+# ITA: Probabilità di comparsa.
+mobs_humans_spawn_chance (Humans spawn chance) int 60000
+
 # ENG: Whether if mobs can heal and gain experience.
 #
 # ITA: Se i mob possono guarire e guadagnare esperienza.
 mobs_humans_dynamic	(Humans heal and gain experience)	bool	false
+
+# ENG: Whether if armors and weapons levels must be completely random
+# or based on realistic chance.
+#
+# ITA: Se livelli di armi e armature debbano essere completamente casuali
+# o basati su probabilità realistica.
+mobs_humans_realistic_chance (Realistic equipment levels) bool true
 
 # ENG: Display hovering nametags on humans.
 #

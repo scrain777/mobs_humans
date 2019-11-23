@@ -1,14 +1,16 @@
 # textdomain:mobs_humans
 
-Human Bones=
-
-# Hello<space>
 Saluton =
-
-# , my name is<space>
 , mia nomo estas =
-
-# Non Playing Character
-NPC=
-
-Spawn Human=
+Armor: =
+Damage: =
+Fights: =
+Attack: =
+ hit by =
+Armor level: =
+Weapon damage: =
+Effective damage: =
+Spawn Human Monster=
+Spawn Human Animal=
+Human Bones=
+Spawn Human NPC=

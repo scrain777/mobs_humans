@@ -173,20 +173,7 @@ if (mobs_humans.b_Dynamic == true) then
 					end
 				end
 
-				if (mobs_humans.b_ShowNametags == true)
-				and (mobs_humans.b_ShowStats == true)
-				then
-					local s_NametagColor = mobs_humans.NametagColor(self.armor)
-
-					self.nametag = minetest.colorize(s_NametagColor,
-						self.given_name
-						.. ' (' .. self.class .. ')' .. '\n'
-						.. S('Armor: ') .. self.armor .. '\n'
-						.. S('Damage: ') .. self.damage .. '\n'
-						.. S('Fights: ') .. self.i_SurvivedFights)
-
-					self.object:set_properties({ nametag = self.nametag })
-				end
+				mobs_humans.Nametag(self) -- Update the nametag.
 			end
 		end
 	end
@@ -537,13 +524,6 @@ mobs_humans.OnSpawnNormal = function(self)
 
 	self.given_name = mobs_humans.RandomString(mobs_humans.RandomNumber(2, 5))
 
-	if (self.armor ~= 100) then
-		self.armor = 100
-	end
-
-	self.nametag = minetest.colorize('white', self.given_name ..
-		' (' .. self.class .. ')')
-
 	local t_Appearence = {'', '', '', ''}
 
 	t_Appearence[1] = self.textures[1] -- Skin
@@ -555,8 +535,6 @@ mobs_humans.OnSpawnNormal = function(self)
 	self.base_texture = self.textures
 
 	self.object:set_properties({
-		given_name = self.given_name,
-		nametag = self.nametag,
 		textures = self.textures,
 		base_texture = self.base_texture
 	})
@@ -575,30 +553,39 @@ if (mobs_humans.b_Dynamic == true) then
 		local s_Indigo = '#4B0082'
 		local s_Violet = '#8000FF'
 		local s_ColorToAppy = ''
+		print("Armor: " .. a_i_armor)
 
-		if (a_i_armor <= 100) and (a_i_armor >= 90) then
+		if (a_i_armor <= 100) and (a_i_armor >= 89) then
 			s_ColorToAppy = s_White
+			print("Color: white")
 
-		elseif (a_i_armor < 90) and (a_i_armor >= 80) then
+		elseif (a_i_armor < 89) and (a_i_armor >= 78) then
 			s_ColorToAppy = s_Green
+			print("Color: green")
 
-		elseif (a_i_armor < 80) and (a_i_armor >= 70) then
+		elseif (a_i_armor < 78) and (a_i_armor >= 66) then
 			s_ColorToAppy = s_Yellow
+			print("Color: yellow")
 
-		elseif (a_i_armor < 70) and (a_i_armor >= 60) then
+		elseif (a_i_armor < 66) and (a_i_armor >= 55) then
 			s_ColorToAppy = s_Orange
+			print("Color: orange")
 
-		elseif (a_i_armor < 60) and (a_i_armor >= 50) then
+		elseif (a_i_armor < 55) and (a_i_armor >= 44) then
 			s_ColorToAppy = s_Red
+			print("Color: red")
 
-		elseif (a_i_armor < 40) and (a_i_armor >= 30) then
+		elseif (a_i_armor < 44) and (a_i_armor >= 33) then
 			s_ColorToAppy = s_Blue
+			print("Color: blue")
 
-		elseif (a_i_armor < 30) and (a_i_armor >= 20) then
+		elseif (a_i_armor < 33) and (a_i_armor >= 21) then
 			s_ColorToAppy = s_Indigo
+			print("Color: indigo")
 
-		elseif (a_i_armor < 20) and (a_i_armor >= 10) then
+		elseif (a_i_armor < 21) and (a_i_armor >= 10) then
 			s_ColorToAppy = s_Violet
+			print("Color: violet")
 
 		end
 
@@ -607,79 +594,85 @@ if (mobs_humans.b_Dynamic == true) then
 
 
 	mobs_humans.RandomArmorLevel = function()
-		local i_RandomNumber = mobs_humans.RandomNumber(1, 100)
 		local i_ChosenLevel = nil
 
-		--[[
-			These percentages have been collected using Ores Stats
-			Mapgen = flat
-			Map seed = 0123456789
-			Letting the character in autowalk from surface to -31000.
-
-			The ore's percentages sum is 50.476%
-			Stone and wood percentages have been arbitrarily set:
-			(100% - 50.476%) = 49.524% -- To be assigned.
-			(49.524% / 6) = 8.254% -- Allows the following:
-
-			Stone's percentage = Twice the wood's percentage
-			Stone is everywhere, wood might be harder to find.
-
-			Stone = (8.254% * 4) = 33.016%
-			Wood = (8.254% * 2) = 16.508%
-
-			(33.016% + 16.508%) = 49.524% -- Assigned.
-
-			Ores + (Wood + Stone) = 50.476% + 49.524% = 100% Assigned.
-		--]]
-
-		-- These values have been rounded to integers due the fact
-		-- that the pseudorandom number generator only produces integers.
-
-		local i_DIAMOND_ORE_PERCENTAGE = 2
-		-- Actually 1.545
-
-		local i_MESE_ORE_PERCENTAGE = 3
-		-- Actually 2.818
-
-		local i_COPPER_ORE_PERCENTAGE = 14
-		-- Actually 13.796, used for 'bronze'.
-
-		local i_WOOD_PERCENTAGE = 17
-		-- Actually 16.508
-
-		local i_IRON_ORE_PERCENTAGE = 32
-		-- Actually 32.317, used for 'steel'.
-
-		local i_STONE_PERCENTAGE = 33
-		-- Actually 33.016
-
-
-		if (i_RandomNumber <= i_DIAMOND_ORE_PERCENTAGE) then
-			i_ChosenLevel = mobs_humans.RandomNumber(10, 24)
-
-		elseif (i_RandomNumber > i_DIAMOND_ORE_PERCENTAGE)
-		and (i_RandomNumber <= i_MESE_ORE_PERCENTAGE)
-		then
-			i_ChosenLevel = mobs_humans.RandomNumber(25, 39)
-
-		elseif (i_RandomNumber > i_MESE_ORE_PERCENTAGE)
-		and (i_RandomNumber <= i_COPPER_ORE_PERCENTAGE)
-		then
-			i_ChosenLevel = mobs_humans.RandomNumber(40, 54)
-
-		elseif (i_RandomNumber > i_COPPER_ORE_PERCENTAGE)
-		and (i_RandomNumber <= i_WOOD_PERCENTAGE)
-		then
-			i_ChosenLevel = mobs_humans.RandomNumber(55, 69)
-
-		elseif (i_RandomNumber > i_WOOD_PERCENTAGE)
-		and (i_RandomNumber <= i_IRON_ORE_PERCENTAGE)
-		then
-			i_ChosenLevel = mobs_humans.RandomNumber(70, 84)
+		if (mobs_humans.b_REALISTIC_CHANCE == false) then
+			i_ChosenLevel = math.random(10, 100)
 
 		else
-			i_ChosenLevel = mobs_humans.RandomNumber(85, 100)
 
+			--[[
+				These percentages have been collected using Ores Stats
+				Mapgen = flat
+				Map seed = 0123456789
+				Letting the character in autowalk from surface to -31000.
+
+				The ore's percentages sum is 50.476%
+				Stone and wood percentages have been arbitrarily set:
+				(100% - 50.476%) = 49.524% -- To be assigned.
+				(49.524% / 6) = 8.254% -- Allows the following:
+
+				Stone's percentage = Twice the wood's percentage
+				Stone is everywhere, wood might be harder to find.
+
+				Stone = (8.254% * 4) = 33.016%
+				Wood = (8.254% * 2) = 16.508%
+
+				(33.016% + 16.508%) = 49.524% -- Assigned.
+
+				Ores + (Wood + Stone) = 50.476% + 49.524% = 100% Assigned.
+			--]]
+
+			-- These values have been rounded to integers due the fact
+			-- that the pseudorandom number generator only produces integers.
+
+			local i_DIAMOND_ORE_PERCENTAGE = 2
+			-- Actually 1.545
+
+			local i_MESE_ORE_PERCENTAGE = 3
+			-- Actually 2.818
+
+			local i_COPPER_ORE_PERCENTAGE = 14
+			-- Actually 13.796, used for 'bronze'.
+
+			local i_WOOD_PERCENTAGE = 17
+			-- Actually 16.508
+
+			local i_IRON_ORE_PERCENTAGE = 32
+			-- Actually 32.317, used for 'steel'.
+
+			local i_STONE_PERCENTAGE = 33
+			-- Actually 33.016
+
+			local i_RandomNumber = mobs_humans.RandomNumber(1, 100)
+
+			if (i_RandomNumber <= i_DIAMOND_ORE_PERCENTAGE) then
+				i_ChosenLevel = mobs_humans.RandomNumber(10, 24)
+
+			elseif (i_RandomNumber > i_DIAMOND_ORE_PERCENTAGE)
+			and (i_RandomNumber <= i_MESE_ORE_PERCENTAGE)
+			then
+				i_ChosenLevel = mobs_humans.RandomNumber(25, 39)
+
+			elseif (i_RandomNumber > i_MESE_ORE_PERCENTAGE)
+			and (i_RandomNumber <= i_COPPER_ORE_PERCENTAGE)
+			then
+				i_ChosenLevel = mobs_humans.RandomNumber(40, 54)
+
+			elseif (i_RandomNumber > i_COPPER_ORE_PERCENTAGE)
+			and (i_RandomNumber <= i_WOOD_PERCENTAGE)
+			then
+				i_ChosenLevel = mobs_humans.RandomNumber(55, 69)
+
+			elseif (i_RandomNumber > i_WOOD_PERCENTAGE)
+			and (i_RandomNumber <= i_IRON_ORE_PERCENTAGE)
+			then
+				i_ChosenLevel = mobs_humans.RandomNumber(70, 84)
+
+			else
+				i_ChosenLevel = mobs_humans.RandomNumber(85, 100)
+
+			end
 		end
 
 		return i_ChosenLevel
@@ -687,7 +680,6 @@ if (mobs_humans.b_Dynamic == true) then
 
 
 	mobs_humans.RandomSword = function()
-		local i_RandomNumber = mobs_humans.RandomNumber(1, 100)
 		local t_ChosenSword = {}
 
 		local t_DefaultSwords = {
@@ -728,76 +720,83 @@ if (mobs_humans.b_Dynamic == true) then
 			}
 		}
 
-		--[[
-			These percentages have been collected using Ores Stats
-			Mapgen = flat
-			Map seed = 0123456789
-			Letting the character in autowalk from surface to -31000.
-
-			The ore's percentages sum is 50.476%
-			Stone and wood percentages have been arbitrarily set:
-			(100% - 50.476%) = 49.524% -- To be assigned.
-			(49.524% / 6) = 8.254% -- Allows the following:
-
-			Stone's percentage = Twice the wood's percentage
-			Stone is everywhere, wood might be harder to find.
-
-			Stone = (8.254% * 4) = 33.016%
-			Wood = (8.254% * 2) = 16.508%
-
-			(33.016% + 16.508%) = 49.524% -- Assigned.
-
-			Ores + (Wood + Stone) = 50.476% + 49.524% = 100% Assigned.
-		--]]
-
-		-- These values have been rounded to integers due the fact
-		-- that the pseudorandom number generator only produces integers.
-
-		local i_DIAMOND_ORE_PERCENTAGE = 2
-		-- Actually 1.545
-
-		local i_MESE_ORE_PERCENTAGE = 3
-		-- Actually 2.818
-
-		local i_COPPER_ORE_PERCENTAGE = 14
-		-- Actually 13.796, used for 'bronze'.
-
-		local i_WOOD_PERCENTAGE = 17
-		-- Actually 16.508
-
-		local i_IRON_ORE_PERCENTAGE = 32
-		-- Actually 32.317, used for 'steel'.
-
-		local i_STONE_PERCENTAGE = 33
-		-- Actually 33.016
-
-
-		if (i_RandomNumber <= i_DIAMOND_ORE_PERCENTAGE) then
-			t_ChosenSword = t_DefaultSwords[6] -- Diamond sword.
-
-		elseif (i_RandomNumber > i_DIAMOND_ORE_PERCENTAGE)
-		and (i_RandomNumber <= i_MESE_ORE_PERCENTAGE)
-		then
-			t_ChosenSword = t_DefaultSwords[5] -- Mese sword.
-
-		elseif (i_RandomNumber > i_MESE_ORE_PERCENTAGE)
-		and (i_RandomNumber <= i_COPPER_ORE_PERCENTAGE)
-		then
-			t_ChosenSword = t_DefaultSwords[3] -- Copper sword.
-
-		elseif (i_RandomNumber > i_COPPER_ORE_PERCENTAGE)
-		and (i_RandomNumber <= i_WOOD_PERCENTAGE)
-		then
-			t_ChosenSword = t_DefaultSwords[1] -- Wooden sword.
-
-		elseif (i_RandomNumber > i_WOOD_PERCENTAGE)
-		and (i_RandomNumber <= i_IRON_ORE_PERCENTAGE)
-		then
-			t_ChosenSword = t_DefaultSwords[4] -- Steel sword.
+		if (mobs_humans.b_REALISTIC_CHANCE == false) then
+			t_ChosenSword = t_DefaultSwords[math.random(1, 6)]
 
 		else
-			t_ChosenSword = t_DefaultSwords[2] -- Stone sword.
 
+			--[[
+				These percentages have been collected using Ores Stats
+				Mapgen = flat
+				Map seed = 0123456789
+				Letting the character in autowalk from surface to -31000.
+
+				The ore's percentages sum is 50.476%
+				Stone and wood percentages have been arbitrarily set:
+				(100% - 50.476%) = 49.524% -- To be assigned.
+				(49.524% / 6) = 8.254% -- Allows the following:
+
+				Stone's percentage = Twice the wood's percentage
+				Stone is everywhere, wood might be harder to find.
+
+				Stone = (8.254% * 4) = 33.016%
+				Wood = (8.254% * 2) = 16.508%
+
+				(33.016% + 16.508%) = 49.524% -- Assigned.
+
+				Ores + (Wood + Stone) = 50.476% + 49.524% = 100% Assigned.
+			--]]
+
+			-- These values have been rounded to integers due the fact
+			-- that the pseudorandom number generator only produces integers.
+
+			local i_DIAMOND_ORE_PERCENTAGE = 2
+			-- Actually 1.545
+
+			local i_MESE_ORE_PERCENTAGE = 3
+			-- Actually 2.818
+
+			local i_COPPER_ORE_PERCENTAGE = 14
+			-- Actually 13.796, used for 'bronze'.
+
+			local i_WOOD_PERCENTAGE = 17
+			-- Actually 16.508
+
+			local i_IRON_ORE_PERCENTAGE = 32
+			-- Actually 32.317, used for 'steel'.
+
+			local i_STONE_PERCENTAGE = 33
+			-- Actually 33.016
+
+			local i_RandomNumber = mobs_humans.RandomNumber(1, 100)
+
+			if (i_RandomNumber <= i_DIAMOND_ORE_PERCENTAGE) then
+				t_ChosenSword = t_DefaultSwords[6] -- Diamond sword.
+
+			elseif (i_RandomNumber > i_DIAMOND_ORE_PERCENTAGE)
+			and (i_RandomNumber <= i_MESE_ORE_PERCENTAGE)
+			then
+				t_ChosenSword = t_DefaultSwords[5] -- Mese sword.
+
+			elseif (i_RandomNumber > i_MESE_ORE_PERCENTAGE)
+			and (i_RandomNumber <= i_COPPER_ORE_PERCENTAGE)
+			then
+				t_ChosenSword = t_DefaultSwords[3] -- Copper sword.
+
+			elseif (i_RandomNumber > i_COPPER_ORE_PERCENTAGE)
+			and (i_RandomNumber <= i_WOOD_PERCENTAGE)
+			then
+				t_ChosenSword = t_DefaultSwords[1] -- Wooden sword.
+
+			elseif (i_RandomNumber > i_WOOD_PERCENTAGE)
+			and (i_RandomNumber <= i_IRON_ORE_PERCENTAGE)
+			then
+				t_ChosenSword = t_DefaultSwords[4] -- Steel sword.
+
+			else
+				t_ChosenSword = t_DefaultSwords[2] -- Stone sword.
+
+			end
 		end
 
 		return t_ChosenSword
@@ -880,13 +879,6 @@ if (mobs_humans.b_Dynamic == true) then
 
 		self.armor = mobs_humans.RandomArmorLevel()
 
-		self.given_name = mobs_humans.RandomString(mobs_humans.RandomNumber(2, 5))
-
-		local s_NametagColor = mobs_humans.NametagColor(self.armor)
-
-		self.nametag = minetest.colorize(s_NametagColor, self.given_name ..
-			' (' .. self.class .. ')')
-
 		self.initial_hp = mobs_humans.RandomNumber(self.hp_min, self.hp_max)
 
 		self.object:set_hp(self.initial_hp)
@@ -894,6 +886,8 @@ if (mobs_humans.b_Dynamic == true) then
 		self.weapon = mobs_humans.RandomSword()
 
 		self.damage = self.weapon.i_Damage
+
+		self.given_name = mobs_humans.RandomString(mobs_humans.RandomNumber(2, 5))
 
 		local t_Appearence = {'', '', '', ''}
 
@@ -906,8 +900,6 @@ if (mobs_humans.b_Dynamic == true) then
 		self.base_texture = self.textures
 
 		self.object:set_properties({
-			given_name = self.given_name,
-			nametag = self.nametag,
 			textures = self.textures,
 			base_texture = self.base_texture
 		})
@@ -926,13 +918,12 @@ mobs_humans.Nametag = function(self)
 				local s_NametagColor = mobs_humans.NametagColor(self.armor)
 
 				self.nametag = minetest.colorize(s_NametagColor,
-					self.given_name	.. ' (' .. self.class .. ')')
+					self.given_name)
 
 				self.object:set_properties({ nametag = self.nametag })
 
 			else
-				self.nametag = minetest.colorize('white',
-					self.given_name	.. ' (' .. self.class .. ')')
+				self.nametag = minetest.colorize('white', self.given_name)
 
 				self.object:set_properties({ nametag = self.nametag })
 
@@ -1027,13 +1018,27 @@ mobs_humans.NametagDebug = function(self, hitter, time_from_last_punch,
 	local i_ActualDamage = calcPunchDamage(self.object,
 		time_from_last_punch, tool_capabilities)
 
-	local s_Message = s_MobName .. ' hit by ' .. s_PlayerName
-		.. '\n' .. 'Armor level: '
+	local s_Message = s_MobName .. S(' hit by ') .. s_PlayerName
+		.. '\n' .. S('Armor level: ')
 		.. minetest.colorize('red', i_MobArmor)
-		.. '\n' .. 'Weapon damage: '
+		.. '\n' .. S('Weapon damage: ')
 		.. minetest.colorize('red', i_PlayerDamage)
-		.. '\n' .. 'Effective damage: '
+		.. '\n' .. S('Effective damage: ')
 		.. minetest.colorize('red', i_ActualDamage)
 
 	minetest.chat_send_player(s_PlayerName, s_Message)
+end
+
+mobs_humans.NormalizeStats = function(self)
+	if (self.armor ~= 100) then
+		self.armor = 100
+
+		self.object:set_properties({armor = self.armor})
+	end
+
+	if (self.damage ~= 1) then
+		self.damage = 1
+
+		self.object:set_properties({damage = self.damage})
+	end
 end
