@@ -138,7 +138,7 @@ if (mobs_humans.b_Dynamic == true) then
 
 	mobs_humans.HurtFlag = function(self)
 		if (self.b_Hurt == nil) then
-			if (self.health == self.max_hp) then
+			if (self.health == self.hp_max) then
 				self.b_Hurt = false
 
 			else
@@ -170,6 +170,8 @@ if (mobs_humans.b_Dynamic == true) then
 				if (self.i_SurvivedFights % mobs_humans.i_FIGHTS_ARMOR == 0) then
 					if (self.armor > 10) then
 						self.armor = (self.armor - 1)
+
+						self.object:set_armor_groups({fleshy = self.armor})
 					end
 				end
 
@@ -544,7 +546,7 @@ end
 if (mobs_humans.b_Dynamic == true) then
 
 	mobs_humans.NametagColor = function(a_i_armor)
-		local s_White = '#00FF00'
+		local s_White = '#FFFFFF'
 		local s_Green = '#00FF00'
 		local s_Yellow = '#FFFF00'
 		local s_Orange = '#FF8000'
@@ -553,39 +555,39 @@ if (mobs_humans.b_Dynamic == true) then
 		local s_Indigo = '#4B0082'
 		local s_Violet = '#8000FF'
 		local s_ColorToAppy = ''
-		print("Armor: " .. a_i_armor)
+		--print("Armor: " .. a_i_armor)
 
 		if (a_i_armor <= 100) and (a_i_armor >= 89) then
 			s_ColorToAppy = s_White
-			print("Color: white")
+			--print("Color: white")
 
 		elseif (a_i_armor < 89) and (a_i_armor >= 78) then
 			s_ColorToAppy = s_Green
-			print("Color: green")
+			--print("Color: green")
 
 		elseif (a_i_armor < 78) and (a_i_armor >= 66) then
 			s_ColorToAppy = s_Yellow
-			print("Color: yellow")
+			--print("Color: yellow")
 
 		elseif (a_i_armor < 66) and (a_i_armor >= 55) then
 			s_ColorToAppy = s_Orange
-			print("Color: orange")
+			--print("Color: orange")
 
 		elseif (a_i_armor < 55) and (a_i_armor >= 44) then
 			s_ColorToAppy = s_Red
-			print("Color: red")
+			--print("Color: red")
 
 		elseif (a_i_armor < 44) and (a_i_armor >= 33) then
 			s_ColorToAppy = s_Blue
-			print("Color: blue")
+			--print("Color: blue")
 
 		elseif (a_i_armor < 33) and (a_i_armor >= 21) then
 			s_ColorToAppy = s_Indigo
-			print("Color: indigo")
+			--print("Color: indigo")
 
 		elseif (a_i_armor < 21) and (a_i_armor >= 10) then
 			s_ColorToAppy = s_Violet
-			print("Color: violet")
+			--print("Color: violet")
 
 		end
 
@@ -853,13 +855,6 @@ if (mobs_humans.b_Dynamic == true) then
 
 
 	mobs_humans.OnSpawnDynamic = function(self)
-		-- Set the initial 'b_Hurt' flag.
-		mobs_humans.HurtFlag(self)
-
-		-- Set the initial 'i_SurvivedFights' flag,
-		-- that is the experience modifier.
-		mobs_humans.SurvivedFlag(self)
-
 		self.class = self.type
 
 		self.floats = mobs_humans.Boolean()
@@ -879,9 +874,13 @@ if (mobs_humans.b_Dynamic == true) then
 
 		self.armor = mobs_humans.RandomArmorLevel()
 
+		self.object:set_armor_groups({fleshy = self.armor})
+
 		self.initial_hp = mobs_humans.RandomNumber(self.hp_min, self.hp_max)
 
-		self.object:set_hp(self.initial_hp)
+		self.hp_max = self.initial_hp
+
+		self.health = self.initial_hp
 
 		self.weapon = mobs_humans.RandomSword()
 
@@ -903,6 +902,22 @@ if (mobs_humans.b_Dynamic == true) then
 			textures = self.textures,
 			base_texture = self.base_texture
 		})
+
+		--print("Initial hp: " .. self.initial_hp)
+		--print("Max hp: " .. self.hp_max)
+		--print("Current hp: " .. self.health)
+		--print("Armor level: " .. self.armor)
+
+		-- Set the initial 'b_Hurt' flag.
+		mobs_humans.HurtFlag(self)
+
+		--print("Hurt: " .. tostring(self.b_Hurt))
+
+		-- Set the initial 'i_SurvivedFights' flag,
+		-- that is the experience modifier.
+		mobs_humans.SurvivedFlag(self)
+
+
 	end
 end
 
@@ -1033,7 +1048,7 @@ mobs_humans.NormalizeStats = function(self)
 	if (self.armor ~= 100) then
 		self.armor = 100
 
-		self.object:set_properties({armor = self.armor})
+		self.object:set_armor_groups({fleshy = self.armor})
 	end
 
 	if (self.damage ~= 1) then
