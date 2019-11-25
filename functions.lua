@@ -50,26 +50,42 @@ mobs_humans.BonesTimer = function(pos, a_i_min_seconds, a_i_max_seconds)
 end
 
 
-mobs_humans.DropBones = function(a_t_position)
-	local i_RandomNumber = mobs_humans.RandomNumber(1, 12)
+mobs_humans.DropBones = function(self, a_t_position)
+	if (a_t_position ~= nil) then
+		local i_RandomNumber = mobs_humans.RandomNumber(1, 12)
 
-	if (i_RandomNumber <= 6) then
-		local s_NodeName = minetest.get_node(a_t_position).name
-		local t_Position = {
-			x = a_t_position.x,
-			y = (a_t_position.y - 1),
-			z = a_t_position.z
-		}
+		if (i_RandomNumber <= 6) then
+			local s_NodeName = minetest.get_node(a_t_position).name
+			local t_Position = {
+				x = a_t_position.x,
+				y = (a_t_position.y - 1),
+				z = a_t_position.z
+			}
 
-		if (s_NodeName == 'air') then
-			minetest.set_node(t_Position, {
-				name = 'mobs_humans:human_bones'
-			})
+			if (s_NodeName == 'air') then
+				minetest.set_node(t_Position, {
+					name = 'mobs_humans:human_bones'
+				})
 
+				local s_Meta = minetest.get_meta(t_Position)
+				local s_MobName = self.given_name
+				local s_BonesInfotext = S('Bones of ') .. s_MobName
+				s_Meta:set_string('owner', s_BonesInfotext)
+				s_Meta:set_string('infotext', s_BonesInfotext)
+			end
 		end
 	end
 end
 
+
+mobs_humans.DropWeapon = function(self)
+	if (self.attack ~= nil)
+	and (self.attack:is_player() == true)
+	then
+		--local s_PlayerName = self.attack:get_player_name()
+		--print(self.given_name .. " killed by " .. s_PlayerName)
+	end
+end
 
 mobs_humans.RandomAttackType = function()
 	local s_AttackName = ''
@@ -99,23 +115,24 @@ end
 
 
 mobs_humans.Speak = function(self, clicker)
-	if (self.health > 0)
-	and (self.state ~= 'attack')
-	and (self.state ~= 'runaway')
-	then
-		local s_MESSAGE1 = S('Saluton ')
-		local s_MESSAGE2 = S(', mia nomo estas ')
-		local s_PlayerName = clicker:get_player_name()
-		local s_Message = s_MESSAGE1 .. s_PlayerName .. s_MESSAGE2
-			.. self.given_name .. '.\n'
+	if (minetest.is_player(clicker) == true) then
+		if (self.health > 0)
+		and (self.state ~= 'attack')
+		and (self.state ~= 'runaway')
+		then
+			local s_MESSAGE1 = S('Saluton ')
+			local s_MESSAGE2 = S(', mia nomo estas ')
+			local s_PlayerName = clicker:get_player_name()
+			local s_Message = s_MESSAGE1 .. s_PlayerName .. s_MESSAGE2
+				.. self.given_name .. '.\n'
 
-		minetest.chat_send_player(s_PlayerName, s_Message)
+			minetest.chat_send_player(s_PlayerName, s_Message)
+		end
 	end
 end
 
 
-if (mobs_humans.b_Dynamic == true) then
-
+if (mobs_humans.DynamicMode == true) then
 	mobs_humans.HitFlag = function(self)
 		if (self.b_Hit ~= true) then
 			self.b_Hit = true
@@ -524,7 +541,7 @@ mobs_humans.OnSpawnNormal = function(self)
 		self.attack_animals = mobs_humans.Boolean()
 	end
 
-	self.given_name = mobs_humans.RandomString(mobs_humans.RandomNumber(2, 5))
+	self.given_name = mobs_humans.RandomString(mobs_humans.RandomNumber(3, 5))
 
 	local t_Appearence = {'', '', '', ''}
 
@@ -543,8 +560,7 @@ mobs_humans.OnSpawnNormal = function(self)
 end
 
 
-if (mobs_humans.b_Dynamic == true) then
-
+if (mobs_humans.DynamicMode == true) then
 	mobs_humans.NametagColor = function(a_i_armor)
 		local s_White = '#FFFFFF'
 		local s_Green = '#00FF00'
@@ -806,7 +822,7 @@ if (mobs_humans.b_Dynamic == true) then
 
 
 	mobs_humans.UpdateWeaponTexture = function(self, a_i_damage)
-		local s_WeaponTexture = 'mobs_humans_transparent.png'
+		local s_WeaponTexture = ''
 
 		if (a_i_damage > 1) and (a_i_damage < 4) then
 			s_WeaponTexture = 'default_tool_woodsword.png'
@@ -838,11 +854,13 @@ if (mobs_humans.b_Dynamic == true) then
 			textures = self.textures,
 			base_texture = self.base_texture
 		})
+
+		self.b_hold_sword = true
 	end
 
 
 	mobs_humans.SwordSheath = function(self)
-		if (self.textures[3] ~= 'mobs_humans_transparent.png') then
+		if (self.b_hold_sword ~= false) then
 			self.textures[3] = 'mobs_humans_transparent.png'
 			self.base_texture = self.textures
 
@@ -850,6 +868,8 @@ if (mobs_humans.b_Dynamic == true) then
 				textures = self.textures,
 				base_texture = self.base_texture
 			})
+
+			self.b_hold_sword = false
 		end
 	end
 
@@ -886,7 +906,9 @@ if (mobs_humans.b_Dynamic == true) then
 
 		self.damage = self.weapon.i_Damage
 
-		self.given_name = mobs_humans.RandomString(mobs_humans.RandomNumber(2, 5))
+		self.b_hold_sword = false
+
+		self.given_name = mobs_humans.RandomString(mobs_humans.RandomNumber(3, 5))
 
 		local t_Appearence = {'', '', '', ''}
 
@@ -929,7 +951,7 @@ mobs_humans.Nametag = function(self)
 
 	else
 		if (mobs_humans.b_ShowStats == false) then
-			if (mobs_humans.b_Dynamic == true) then
+			if (mobs_humans.DynamicMode == true) then
 				local s_NametagColor = mobs_humans.NametagColor(self.armor)
 
 				self.nametag = minetest.colorize(s_NametagColor,
@@ -945,8 +967,12 @@ mobs_humans.Nametag = function(self)
 			end
 
 		else
-			if (mobs_humans.b_Dynamic == true) then
+			if (mobs_humans.DynamicMode == true) then
 				local s_NametagColor = mobs_humans.NametagColor(self.armor)
+
+				if (self.i_SurvivedFights == nil) then
+					self.i_SurvivedFights = 0
+				end
 
 				self.nametag = minetest.colorize(s_NametagColor,
 					self.given_name
@@ -1017,31 +1043,32 @@ end
 
 mobs_humans.NametagDebug = function(self, hitter, time_from_last_punch,
 	tool_capabilities, direction)
+	if (minetest.is_player(hitter) == true) then
+		--[[
+		print('Self: ' .. dump(self))
+		print('Hitter: ' .. dump(hitter))
+		print('Time from last punch: ' .. dump(time_from_last_punch))
+		print('Tool capabilities: ' .. dump(tool_capabilities))
+		print('Direction: ' .. dump(direction))
+		--]]
 
-	--[[
-	print('Self: ' .. dump(self))
-	print('Hitter: ' .. dump(hitter))
-	print('Time from last punch: ' .. dump(time_from_last_punch))
-	print('Tool capabilities: ' .. dump(tool_capabilities))
-	print('Direction: ' .. dump(direction))
-	--]]
+		local s_MobName = self.given_name
+		local i_MobArmor = self.armor
+		local s_PlayerName = hitter:get_player_name()
+		local i_PlayerDamage = tool_capabilities.damage_groups.fleshy
+		local i_ActualDamage = calcPunchDamage(self.object,
+			time_from_last_punch, tool_capabilities)
 
-	local s_MobName = self.given_name
-	local i_MobArmor = self.armor
-	local s_PlayerName = hitter:get_player_name()
-	local i_PlayerDamage = tool_capabilities.damage_groups.fleshy
-	local i_ActualDamage = calcPunchDamage(self.object,
-		time_from_last_punch, tool_capabilities)
+		local s_Message = s_MobName .. S(' hit by ') .. s_PlayerName
+			.. '\n' .. S('Armor level: ')
+			.. minetest.colorize('red', i_MobArmor)
+			.. '\n' .. S('Weapon damage: ')
+			.. minetest.colorize('red', i_PlayerDamage)
+			.. '\n' .. S('Effective damage: ')
+			.. minetest.colorize('red', i_ActualDamage)
 
-	local s_Message = s_MobName .. S(' hit by ') .. s_PlayerName
-		.. '\n' .. S('Armor level: ')
-		.. minetest.colorize('red', i_MobArmor)
-		.. '\n' .. S('Weapon damage: ')
-		.. minetest.colorize('red', i_PlayerDamage)
-		.. '\n' .. S('Effective damage: ')
-		.. minetest.colorize('red', i_ActualDamage)
-
-	minetest.chat_send_player(s_PlayerName, s_Message)
+		minetest.chat_send_player(s_PlayerName, s_Message)
+	end
 end
 
 mobs_humans.NormalizeStats = function(self)

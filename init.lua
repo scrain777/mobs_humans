@@ -43,6 +43,13 @@ if (mobs_humans.i_SpawnChance == nil) then
 	mobs_humans.i_SpawnChance = 60000
 end
 
+mobs_humans.b_3D_Armor = minetest.get_modpath('3d_armor')
+if (mobs_humans.b_3D_Armor == nil) then
+	mobs_humans.b_3D_Armor = false
+else
+	mobs_humans.b_3D_Armor = true
+end
+
 mobs_humans.b_Dynamic = minetest.settings:get_bool('mobs_humans_dynamic')
 if (mobs_humans.b_Dynamic == nil) then
 	mobs_humans.b_Dynamic = false
@@ -63,8 +70,22 @@ if (mobs_humans.b_Debug == nil) then
 	mobs_humans.b_Debug = false
 end
 
-if (mobs_humans.b_Dynamic == true) then
+mobs_humans.DynamicMode = false
+if (mobs_humans.b_3D_Armor == false)
+and (mobs_humans.b_Dynamic == true)
+then
+	mobs_humans.DynamicMode = true
 
+elseif (mobs_humans.b_3D_Armor == true)
+and (mobs_humans.b_Dynamic == false)
+then
+	mobs_humans.DynamicMode = false
+
+end
+--print("Dynamic mode: " .. tostring(mobs_humans.DynamicMode))
+
+
+if (mobs_humans.DynamicMode == true) then
 	-- When the mob can heal.
 	mobs_humans.t_ALLOWED_STATES = {'stand', 'walk'}
 
@@ -91,9 +112,28 @@ if (mobs_humans.b_Dynamic == true) then
 	end
 end
 
--- Local variable
+
+--
+-- Local variables
+--
 
 local s_ModPath = minetest.get_modpath('mobs_humans')
+
+-- Used for localization
+
+local S = minetest.get_translator('mobs_humans')
+
+
+-- Items that can be dropped when the mob dies.
+mobs_humans.t_Drops = {
+	{name = 'default:apple',			chance = 6, min = 1, max = 2},
+	{name = 'default:blueberries',		chance = 6, min = 1, max = 5},
+	{name = 'farming:bread',			chance = 12, min = 1, max = 2},
+	{name = 'farming:seed_cotton',		chance = 6, min = 1, max = 5},
+	{name = 'farming:seed_wheat',		chance = 6, min = 1, max = 5},
+	{name = 'flowers:mushroom_brown',	chance = 6, min = 1, max = 3},
+	{name = 'flowers:mushroom_red', 	chance = 6, min = 1, max = 3}
+}
 
 -- Available skins (../minetest/mods/mobs_humans/textures/)
 mobs_humans.t_Skins = {

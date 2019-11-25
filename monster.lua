@@ -78,8 +78,7 @@ mobs:register_mob('mobs_humans:human_monster', {
 		attack = 'default_punch',
 		shoot_attack = 'mobs_swing'
 	},
-	drops = {
-	},
+	drops = mobs_humans.t_Drops,
 	visual = 'mesh',
 	visual_size = {x = 1, y = 1},
 	collisionbox = {-0.3, -1.0, -0.3, 0.3, 0.75, 0.3},
@@ -105,7 +104,7 @@ mobs:register_mob('mobs_humans:human_monster', {
 	},
 
 	on_spawn = function(self, pos)
-		if (mobs_humans.b_Dynamic == true) then
+		if (mobs_humans.DynamicMode == true) then
 			if (self.nametag == 'Human')
 			or (self.class == nil) -- For backward compatibility.
 			then
@@ -121,6 +120,7 @@ mobs:register_mob('mobs_humans:human_monster', {
 
 			end
 
+			mobs_humans.NormalizeStats(self) -- Armor = 100; Damage = 1
 		end
 
 		mobs_humans.Nametag(self) -- Set the nametag accordingly to settings.
@@ -129,7 +129,7 @@ mobs:register_mob('mobs_humans:human_monster', {
 	do_punch = function(self, hitter, time_from_last_punch, tool_capabilities,
 		direction)
 
-		if (mobs_humans.b_Dynamic == true) then
+		if (mobs_humans.DynamicMode == true) then
 			mobs_humans.HitFlag(self) -- Used for experience gain.
 		end
 
@@ -140,8 +140,7 @@ mobs:register_mob('mobs_humans:human_monster', {
 	end,
 
 	do_custom = function(self, dtime)
-		if (mobs_humans.b_Dynamic == true) then
-
+		if (mobs_humans.DynamicMode == true) then
 			-- Heal if possible.
 			mobs_humans.Heal(self, dtime, mobs_humans.t_ALLOWED_STATES,
 				mobs_humans.t_HIT_POINTS, mobs_humans.t_HEAL_DELAY,
@@ -151,7 +150,9 @@ mobs:register_mob('mobs_humans:human_monster', {
 			mobs_humans.Experience(self, dtime)
 
 			-- Draw or sheath the sword if needed.
-			if (self.state == 'attack') then
+			if (self.attack_type ~= 'shoot') -- Not for 'ranged only' mobs.
+			and (self.state == 'attack')
+			then
 				if (self.textures[3] == 'mobs_humans_transparent.png') then
 					mobs_humans.UpdateWeaponTexture(self, self.damage)
 				end
@@ -168,7 +169,8 @@ mobs:register_mob('mobs_humans:human_monster', {
 	end,
 
 	on_die = function(self, pos)
-		mobs_humans.DropBones(pos)
+		mobs_humans.DropBones(self, pos)
+		mobs_humans.DropWeapon(self)
 	end
 })
 
