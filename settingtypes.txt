@@ -3,6 +3,16 @@
 # ITA: Probabilità di comparsa.
 mobs_humans_spawn_chance (Humans spawn chance) int 60000
 
+# ENG: Min spawn height.
+#
+# ITA: Altezza minima di comparsa.
+mobs_humans_min_spawn_height (Humans min spawn height) int 1
+
+# ENG: Max spawn height.
+#
+# ITA: Altezza massima di comparsa.
+mobs_humans_max_spawn_height (Humans max spawn height) int 240
+
 # ENG: Whether if mobs can heal and gain experience.
 #
 # ITA: Se i mob possono guarire e guadagnare esperienza.

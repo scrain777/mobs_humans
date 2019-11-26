@@ -1,3 +1,8 @@
+Copyright (C) 2013 Stuart Jones (LGPL v2.1)
+	mobs_humans_character.b3d
+	mobs_humans_character.blend
+Special credit to Jordach and MirceaKitsune for providing the default 3d character model.
+
 mobs_humans_bones_model.obj
 from Bones Model by Christian9
 CC0

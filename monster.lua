@@ -84,6 +84,7 @@ mobs:register_mob('mobs_humans:human_monster', {
 	collisionbox = {-0.3, -1.0, -0.3, 0.3, 0.75, 0.3},
 	selectionbox = {-0.3, -1.0, -0.3, 0.3, 0.75, 0.3},
 	textures = mobs_humans.t_Skins,
+	blood_texture = 'mobs_blood.png',
 	mesh = 'mobs_humans_character.b3d',
 	animation = {
 		stand_start = 0,
@@ -104,7 +105,7 @@ mobs:register_mob('mobs_humans:human_monster', {
 	},
 
 	on_spawn = function(self, pos)
-		if (mobs_humans.DynamicMode == true) then
+		if (mobs_humans.b_DynamicMode == true) then
 			if (self.nametag == 'Human')
 			or (self.class == nil) -- For backward compatibility.
 			then
@@ -129,8 +130,9 @@ mobs:register_mob('mobs_humans:human_monster', {
 	do_punch = function(self, hitter, time_from_last_punch, tool_capabilities,
 		direction)
 
-		if (mobs_humans.DynamicMode == true) then
+		if (mobs_humans.b_DynamicMode == true) then
 			mobs_humans.HitFlag(self) -- Used for experience gain.
+			mobs_humans.PlayerHitFlag(self, hitter) -- Used for weapon drop.
 		end
 
 		if (mobs_humans.b_Debug == true) then -- Debug mode nametag.
@@ -140,7 +142,7 @@ mobs:register_mob('mobs_humans:human_monster', {
 	end,
 
 	do_custom = function(self, dtime)
-		if (mobs_humans.DynamicMode == true) then
+		if (mobs_humans.b_DynamicMode == true) then
 			-- Heal if possible.
 			mobs_humans.Heal(self, dtime, mobs_humans.t_ALLOWED_STATES,
 				mobs_humans.t_HIT_POINTS, mobs_humans.t_HEAL_DELAY,
@@ -150,17 +152,7 @@ mobs:register_mob('mobs_humans:human_monster', {
 			mobs_humans.Experience(self, dtime)
 
 			-- Draw or sheath the sword if needed.
-			if (self.attack_type ~= 'shoot') -- Not for 'ranged only' mobs.
-			and (self.state == 'attack')
-			then
-				if (self.textures[3] == 'mobs_humans_transparent.png') then
-					mobs_humans.UpdateWeaponTexture(self, self.damage)
-				end
-
-			else
-				mobs_humans.SwordSheath(self)
-
-			end
+			mobs_humans.SwordToggle(self)
 		end
 	end,
 
@@ -170,7 +162,10 @@ mobs:register_mob('mobs_humans:human_monster', {
 
 	on_die = function(self, pos)
 		mobs_humans.DropBones(self, pos)
-		mobs_humans.DropWeapon(self)
+
+		if (mobs_humans.b_DynamicMode == true) then
+			mobs_humans.DropWeapon(self, pos)
+		end
 	end
 })
 
@@ -185,8 +180,8 @@ mobs:spawn({
 	neighbors = {'air'},
 	chance = mobs_humans.i_SpawnChance,
 	active_object_count = 1,
-	min_height = 1,
-	max_height = 240
+	min_height = mobs_humans.i_MinSpawnHeight,
+	max_height = mobs_humans.i_MaxSpawnHeight
 })
 
 

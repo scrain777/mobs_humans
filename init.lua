@@ -38,6 +38,16 @@ if (mobs_humans.i_MobDifficulty == nil) then
 	mobs_humans.i_MobDifficulty = 1
 end
 
+mobs_humans.i_MinSpawnHeight = minetest.settings:get('mobs_humans_min_spawn_height')
+if (mobs_humans.i_MinSpawnHeight == nil) then
+	mobs_humans.i_MinSpawnHeight = 1
+end
+
+mobs_humans.i_MaxSpawnHeight = minetest.settings:get('mobs_humans_max_spawn_height')
+if (mobs_humans.i_MaxSpawnHeight == nil) then
+	mobs_humans.i_MaxSpawnHeight = 240
+end
+
 mobs_humans.i_SpawnChance = minetest.settings:get('mobs_humans_spawn_chance')
 if (mobs_humans.i_SpawnChance == nil) then
 	mobs_humans.i_SpawnChance = 60000
@@ -70,22 +80,22 @@ if (mobs_humans.b_Debug == nil) then
 	mobs_humans.b_Debug = false
 end
 
-mobs_humans.DynamicMode = false
+mobs_humans.b_DynamicMode = false
 if (mobs_humans.b_3D_Armor == false)
 and (mobs_humans.b_Dynamic == true)
 then
-	mobs_humans.DynamicMode = true
+	mobs_humans.b_DynamicMode = true
 
 elseif (mobs_humans.b_3D_Armor == true)
 and (mobs_humans.b_Dynamic == false)
 then
-	mobs_humans.DynamicMode = false
+	mobs_humans.b_DynamicMode = false
 
 end
---print("Dynamic mode: " .. tostring(mobs_humans.DynamicMode))
+--print("Dynamic mode: " .. tostring(mobs_humans.b_DynamicMode))
 
 
-if (mobs_humans.DynamicMode == true) then
+if (mobs_humans.b_DynamicMode == true) then
 	-- When the mob can heal.
 	mobs_humans.t_ALLOWED_STATES = {'stand', 'walk'}
 
@@ -157,6 +167,19 @@ dofile(s_ModPath .. '/npc.lua')
 
 
 --
+-- Dummy entity for previous versions.
+--
+
+mobs:register_mob('mobs_humans:human', {
+	nametag = 'Human dummy',
+
+	after_activate = function(self)
+		self.object:remove()
+	end
+})
+
+
+--
 -- Minetest engine debug logging
 --
 
@@ -168,5 +191,5 @@ or (s_LogLevel == 'info')
 or (s_LogLevel == 'verbose')
 then
 	s_LogLevel = nil
-	minetest.log('action', '[Mod] Mobs Humans [v0.3.1] loaded.')
+	minetest.log('action', '[Mod] Mobs Humans [v0.4.0] loaded.')
 end

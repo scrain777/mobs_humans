@@ -55,14 +55,16 @@ mobs_humans.DropBones = function(self, a_t_position)
 		local i_RandomNumber = mobs_humans.RandomNumber(1, 12)
 
 		if (i_RandomNumber <= 6) then
-			local s_NodeName = minetest.get_node(a_t_position).name
 			local t_Position = {
 				x = a_t_position.x,
 				y = (a_t_position.y - 1),
 				z = a_t_position.z
 			}
 
+			local s_NodeName = minetest.get_node(t_Position).name
+
 			if (s_NodeName == 'air') then
+
 				minetest.set_node(t_Position, {
 					name = 'mobs_humans:human_bones'
 				})
@@ -77,15 +79,6 @@ mobs_humans.DropBones = function(self, a_t_position)
 	end
 end
 
-
-mobs_humans.DropWeapon = function(self)
-	if (self.attack ~= nil)
-	and (self.attack:is_player() == true)
-	then
-		--local s_PlayerName = self.attack:get_player_name()
-		--print(self.given_name .. " killed by " .. s_PlayerName)
-	end
-end
 
 mobs_humans.RandomAttackType = function()
 	local s_AttackName = ''
@@ -132,7 +125,7 @@ mobs_humans.Speak = function(self, clicker)
 end
 
 
-if (mobs_humans.DynamicMode == true) then
+if (mobs_humans.b_DynamicMode == true) then
 	mobs_humans.HitFlag = function(self)
 		if (self.b_Hit ~= true) then
 			self.b_Hit = true
@@ -165,6 +158,18 @@ if (mobs_humans.DynamicMode == true) then
 	end
 
 
+	mobs_humans.PlayerHitFlag = function(self, hitter)
+
+		if (minetest.is_player(hitter) == true) then
+			self.b_HitByPlayer = true
+			--print("Hit by player.")
+		else
+			self.b_HitByPlayer = false
+			--print("Hit by something else.")
+		end
+	end
+
+
 	mobs_humans.Experience = function(self, dtime)
 
 		-- Allows experience gain for mobs that have been directly hit.
@@ -181,6 +186,8 @@ if (mobs_humans.DynamicMode == true) then
 				if (self.i_SurvivedFights % mobs_humans.i_FIGHTS_DAMAGE == 0) then
 					if (self.damage < (8 * mobs_humans.i_MobDifficulty)) then
 						self.damage = (self.damage + 1)
+
+						mobs_humans.UpdateWeaponTexture(self, self.damage)
 					end
 				end
 
@@ -241,6 +248,98 @@ if (mobs_humans.DynamicMode == true) then
 						end
 					end
 				end
+			end
+		end
+	end
+
+
+	mobs_humans.DropWeapon = function(self, a_t_position)
+		if (self.attack_type ~= 'shoot')
+		and (self.b_HitByPlayer == true)
+		then
+			local s_MobSword = self.weapon.s_ItemString
+			local i_NumberMax = 100
+
+			-- Drop chances.
+			if (s_MobSword == 'default:sword_diamond') then
+				i_NumberMax = 50 -- Chance: 2%
+
+			elseif (s_MobSword == 'default:sword_mese') then
+				i_NumberMax = 33 -- Chance: 3%
+
+			elseif (s_MobSword == 'default:sword_steel') then
+				i_NumberMax = 3 -- Chance: ~32%
+
+			elseif (s_MobSword == 'default:sword_bronze') then
+				i_NumberMax = 7 -- Chance: 14%
+
+			elseif (s_MobSword == 'default:sword_stone') then
+				i_NumberMax = 3 -- Chance: 33%
+
+			elseif (s_MobSword == 'default:sword_wood') then
+				i_NumberMax = 6 -- Chance: ~17%
+			end
+
+			local i_RandomNumber = mobs_humans.RandomNumber(1, i_NumberMax)
+
+			-- If the number is 1, then choose a tool wear level.
+			if (i_RandomNumber == 1) then
+				local i_UNWORN = 0
+				local i_BROKEN = 65535
+				local i_RandomNumber = mobs_humans.RandomNumber(1, 100)
+				local i_WearLevel = nil
+
+				-- Chance: 2% - Brand new
+				if (i_RandomNumber >= 99) then
+					i_WearLevel = i_UNWORN
+
+				-- Chance: 3% - Almost new
+				elseif (i_RandomNumber < 99)
+				and (i_RandomNumber >= 96)
+				then
+					i_WearLevel = (i_BROKEN / 20) -- 5% worn
+
+				-- Chance: 20% - Not much used
+				elseif (i_RandomNumber < 96)
+				and (i_RandomNumber >= 76)
+				then
+					i_WearLevel = (i_BROKEN / 5) -- 20% worn
+
+				-- Chance: 50% - Used
+				elseif (i_RandomNumber > 26)
+				and (i_RandomNumber < 76)
+				then
+					i_WearLevel = (i_BROKEN / 2) -- 50% worn
+
+				-- Chance: 20% - Very much used
+				elseif (i_RandomNumber > 5)
+				and (i_RandomNumber <= 26)
+				then
+					i_WearLevel = ((i_BROKEN / 2) + (i_BROKEN / 5)) -- 70% worn
+
+				-- Chance: 3% - Almost broken
+				elseif (i_RandomNumber > 2)
+				and (i_RandomNumber <= 5)
+				then
+					i_WearLevel = (i_BROKEN - (i_BROKEN / 20)) -- 95% worn
+
+				-- Chance: 2% - Broken
+				elseif (i_RandomNumber <= 2)
+				then
+					i_WearLevel = i_BROKEN
+				end
+
+
+				-- Actually drop the sword.
+				local t_Position = {
+					x = a_t_position.x,
+					y = (a_t_position.y + 1),
+					z = a_t_position.z
+				}
+
+				local s_ItemString = s_MobSword .. ' 1 ' .. i_WearLevel
+
+				minetest.add_item(t_Position, s_ItemString)
 			end
 		end
 	end
@@ -543,24 +642,11 @@ mobs_humans.OnSpawnNormal = function(self)
 
 	self.given_name = mobs_humans.RandomString(mobs_humans.RandomNumber(3, 5))
 
-	local t_Appearence = {'', '', '', ''}
-
-	t_Appearence[1] = self.textures[1] -- Skin
-	t_Appearence[2] = 'mobs_humans_transparent.png' -- Armor
-	t_Appearence[3] = 'mobs_humans_transparent.png' -- Weapon
-	t_Appearence[4] = 'mobs_humans_transparent.png' -- Shield
-
-	self.textures = t_Appearence
-	self.base_texture = self.textures
-
-	self.object:set_properties({
-		textures = self.textures,
-		base_texture = self.base_texture
-	})
+	mobs_humans.TextureCreator(self, nil)
 end
 
 
-if (mobs_humans.DynamicMode == true) then
+if (mobs_humans.b_DynamicMode == true) then
 	mobs_humans.NametagColor = function(a_i_armor)
 		local s_White = '#FFFFFF'
 		local s_Green = '#00FF00'
@@ -822,7 +908,7 @@ if (mobs_humans.DynamicMode == true) then
 
 
 	mobs_humans.UpdateWeaponTexture = function(self, a_i_damage)
-		local s_WeaponTexture = ''
+		local s_WeaponTexture = 'mobs_humans_transparent.png'
 
 		if (a_i_damage > 1) and (a_i_damage < 4) then
 			s_WeaponTexture = 'default_tool_woodsword.png'
@@ -846,30 +932,43 @@ if (mobs_humans.DynamicMode == true) then
 			s_WeaponTexture = 'default_tool_diamondsword.png'
 		end
 
-		self.weapon_texture = s_WeaponTexture
-		self.textures[3] = s_WeaponTexture
-		self.base_texture = self.textures
-
-		self.object:set_properties({
-			textures = self.textures,
-			base_texture = self.base_texture
-		})
+		mobs_humans.TextureCreator(self, s_WeaponTexture)
 
 		self.b_hold_sword = true
 	end
 
 
-	mobs_humans.SwordSheath = function(self)
-		if (self.b_hold_sword ~= false) then
-			self.textures[3] = 'mobs_humans_transparent.png'
-			self.base_texture = self.textures
+	mobs_humans.SwordDraw = function(self)
+		if (self.b_hold_sword == false) then
+			local s_MobSword = self.weapon.s_Texture
 
-			self.object:set_properties({
-				textures = self.textures,
-				base_texture = self.base_texture
-			})
+			mobs_humans.TextureCreator(self, s_MobSword)
+
+			self.b_hold_sword = true
+		end
+	end
+
+
+	mobs_humans.SwordSheath = function(self)
+		if (self.b_hold_sword == true) then
+			mobs_humans.TextureCreator(self, nil)
 
 			self.b_hold_sword = false
+		end
+	end
+
+
+	mobs_humans.SwordToggle = function(self)
+		if (self.attack_type ~= 'shoot') -- Not for 'ranged only' mobs.
+		and (self.state == 'attack')
+		then
+			if (self.b_hold_sword == false) then
+				mobs_humans.SwordDraw(self)
+			end
+
+		else
+			mobs_humans.SwordSheath(self)
+
 		end
 	end
 
@@ -910,20 +1009,7 @@ if (mobs_humans.DynamicMode == true) then
 
 		self.given_name = mobs_humans.RandomString(mobs_humans.RandomNumber(3, 5))
 
-		local t_Appearence = {'', '', '', ''}
-
-		t_Appearence[1] = self.textures[1] -- Skin
-		t_Appearence[2] = 'mobs_humans_transparent.png' -- Armor
-		t_Appearence[3] = 'mobs_humans_transparent.png' -- Weapon
-		t_Appearence[4] = 'mobs_humans_transparent.png' -- Shield
-
-		self.textures = t_Appearence
-		self.base_texture = self.textures
-
-		self.object:set_properties({
-			textures = self.textures,
-			base_texture = self.base_texture
-		})
+		mobs_humans.TextureCreator(self, nil)
 
 		--print("Initial hp: " .. self.initial_hp)
 		--print("Max hp: " .. self.hp_max)
@@ -938,8 +1024,6 @@ if (mobs_humans.DynamicMode == true) then
 		-- Set the initial 'i_SurvivedFights' flag,
 		-- that is the experience modifier.
 		mobs_humans.SurvivedFlag(self)
-
-
 	end
 end
 
@@ -951,7 +1035,7 @@ mobs_humans.Nametag = function(self)
 
 	else
 		if (mobs_humans.b_ShowStats == false) then
-			if (mobs_humans.DynamicMode == true) then
+			if (mobs_humans.b_DynamicMode == true) then
 				local s_NametagColor = mobs_humans.NametagColor(self.armor)
 
 				self.nametag = minetest.colorize(s_NametagColor,
@@ -967,7 +1051,7 @@ mobs_humans.Nametag = function(self)
 			end
 
 		else
-			if (mobs_humans.DynamicMode == true) then
+			if (mobs_humans.b_DynamicMode == true) then
 				local s_NametagColor = mobs_humans.NametagColor(self.armor)
 
 				if (self.i_SurvivedFights == nil) then
@@ -1041,6 +1125,7 @@ local function calcPunchDamage(obj, actual_interval, tool_caps)
 	return damage or 0
 end
 
+
 mobs_humans.NametagDebug = function(self, hitter, time_from_last_punch,
 	tool_capabilities, direction)
 	if (minetest.is_player(hitter) == true) then
@@ -1071,6 +1156,7 @@ mobs_humans.NametagDebug = function(self, hitter, time_from_last_punch,
 	end
 end
 
+
 mobs_humans.NormalizeStats = function(self)
 	if (self.armor ~= 100) then
 		self.armor = 100
@@ -1083,4 +1169,28 @@ mobs_humans.NormalizeStats = function(self)
 
 		self.object:set_properties({damage = self.damage})
 	end
+end
+
+
+mobs_humans.TextureCreator = function(self, a_s_Weapon)
+	local s_Transparent = 'mobs_humans_transparent.png'
+	local t_Appearence = {
+		s_Transparent, -- Skin
+		s_Transparent, -- Armor
+		s_Transparent, -- Weapon
+		s_Transparent  -- Shield (?)
+	}
+
+	t_Appearence[1] = self.base_texture[1] -- Skin
+
+	if (a_s_Weapon ~= nil) then
+		t_Appearence[3] = a_s_Weapon
+	end
+
+	self.textures = t_Appearence
+	self.base_texture = t_Appearence
+
+	self.object:set_properties({
+		textures = self.textures
+	})
 end

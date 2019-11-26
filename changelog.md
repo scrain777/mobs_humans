@@ -11,6 +11,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 
 
+## [0.4.0] - 2019-11-25
+### Added
+
+	- Many customization options via Settings -> All Settings -> Mods -> mobs_humans
+	- Food drop chance on death.
+	- Weapon drop chance on death if killed by a player.
+	- Debug chat message.
+	- Support for 3d_armor, Bonemeal.
+	- Own mesh model.
+	- Weapon draw/sheath.
+
+### Changed
+
+	- Mod in basic mode if 3D Armor not found, can be overriden via Options.
+	- Code split into different files.
+	- Code improvements, bugfixes, additions, etc.
+	- Random values set to realistic chance by default, can be overriden via Options.
+
+
+
 ## [0.3.0] - 2019-10-17
 ### Added
 

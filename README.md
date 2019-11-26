@@ -2,11 +2,12 @@
 ![Mobs Humans' screenshot](screenshot.png)  
 **_Adds humans._**
 
-**Version:** 0.3.0  
+**Version:** 0.4.0  
 **Source code's license:** [EUPL v1.2][1] or later.  
 **Textures' license:** [CC BY-SA v3.0][2], [CC BY-SA v4.0][3]
 
-**Dependencies:** default (found in [Minetest Game][4]), mobs ([Mobs Redo][5])  
+**Dependencies:** default, farming, flowers (found in [Minetest Game][4]), mobs ([Mobs Redo][5])  
+**Supported:** 3d_armor, bonemeal
 
 
 ### Installation
