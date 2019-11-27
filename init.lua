@@ -158,6 +158,7 @@ mobs_humans.t_Skins = {
 -- Load
 --
 
+dofile(s_ModPath .. '/cme.lua')
 dofile(s_ModPath .. '/functions.lua')
 dofile(s_ModPath .. '/node.lua')
 dofile(s_ModPath .. '/projectile.lua')

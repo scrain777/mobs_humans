@@ -187,7 +187,11 @@ if (mobs_humans.b_DynamicMode == true) then
 					if (self.damage < (8 * mobs_humans.i_MobDifficulty)) then
 						self.damage = (self.damage + 1)
 
-						mobs_humans.UpdateWeaponTexture(self, self.damage)
+						mobs_humans.SwordUpdate(self) -- If needed.
+
+						mobs_humans.TextureCreator(self, self.weapon.s_Texture)
+
+						self.b_hold_sword = true -- Due the textures update.
 					end
 				end
 
@@ -907,37 +911,6 @@ if (mobs_humans.b_DynamicMode == true) then
 	end
 
 
-	mobs_humans.UpdateWeaponTexture = function(self, a_i_damage)
-		local s_WeaponTexture = 'mobs_humans_transparent.png'
-
-		if (a_i_damage > 1) and (a_i_damage < 4) then
-			s_WeaponTexture = 'default_tool_woodsword.png'
-
-		elseif (a_i_damage >= 4) and (a_i_damage < 6)  then
-			s_WeaponTexture = 'default_tool_stonesword.png'
-
-		elseif (a_i_damage >= 6) and (a_i_damage < 7) then
-			s_WeaponTexture = 'default_tool_bronzesword.png'
-
-			local i_RandomNumber = mobs_humans.RandomNumber(0, 1)
-
-			if (i_RandomNumber == 1) then
-				s_WeaponTexture = 'default_tool_steelsword.png'
-			end
-
-		elseif (a_i_damage == 7) then
-			s_WeaponTexture = 'default_tool_mesesword.png'
-
-		elseif (a_i_damage == 8) then
-			s_WeaponTexture = 'default_tool_diamondsword.png'
-		end
-
-		mobs_humans.TextureCreator(self, s_WeaponTexture)
-
-		self.b_hold_sword = true
-	end
-
-
 	mobs_humans.SwordDraw = function(self)
 		if (self.b_hold_sword == false) then
 			local s_MobSword = self.weapon.s_Texture
@@ -954,6 +927,102 @@ if (mobs_humans.b_DynamicMode == true) then
 			mobs_humans.TextureCreator(self, nil)
 
 			self.b_hold_sword = false
+		end
+	end
+
+
+	mobs_humans.SwordUpdate = function(self)
+		if (self.attack_type ~= 'shoot') then -- Not for 'ranged only' mobs.
+			local s_CurrentSword = self.weapon.s_ItemString
+			local i_CurrentDamage = self.damage
+
+			if (i_CurrentDamage > 1)
+			and (i_CurrentDamage < 4)
+			then
+				if (s_CurrentSword ~= 'default:sword_wood') then
+					self.weapon = {
+						s_ItemString = 'default:sword_wood',
+						i_Damage = 2,
+						s_Texture = 'default_tool_woodsword.png'
+					}
+
+					--[[
+					print(self.given_name .. " new sword: "
+						.. dump(self.weapon))
+					--]]
+				end
+
+			elseif (i_CurrentDamage >= 4)
+			and (i_CurrentDamage < 6)
+			then
+				if (s_CurrentSword ~= 'default:sword_stone') then
+					self.weapon = {
+						s_ItemString = 'default:sword_stone',
+						i_Damage = 4,
+						s_Texture = 'default_tool_stonesword.png'
+					}
+
+					--[[
+					print(self.given_name .. " new sword: "
+						.. dump(self.weapon))
+					--]]
+				end
+
+			elseif (i_CurrentDamage == 6) then
+				if (s_CurrentSword ~= 'default:sword_bronze')
+				or (s_CurrentSword ~= 'default:sword_steel')
+				then
+					local i_RandomNumber = mobs_humans.RandomNumber(0, 1)
+
+					if (i_RandomNumber == 0) then
+						self.weapon = {
+							s_ItemString = 'default:sword_bronze',
+							i_Damage = 6,
+							s_Texture = 'default_tool_bronzesword.png'
+						}
+
+					else
+						self.weapon = {
+							s_ItemString = 'default:sword_steel',
+							i_Damage = 6,
+							s_Texture = 'default_tool_steelsword.png'
+						}
+					end
+
+					--[[
+					print(self.given_name .. " new sword: "
+						.. dump(self.weapon))
+					--]]
+				end
+
+			elseif (i_CurrentDamage == 7) then
+				if (s_CurrentSword ~= 'default:sword_mese') then
+					self.weapon = {
+						s_ItemString = 'default:sword_mese',
+						i_Damage = 7,
+						s_Texture = 'default_tool_mesesword.png'
+					}
+
+					--[[
+					print(self.given_name .. " new sword: "
+						.. dump(self.weapon))
+					--]]
+				end
+
+			elseif (i_CurrentDamage == 8) then
+				if (s_CurrentSword ~= 'default:sword_diamond') then
+					self.weapon = {
+						s_ItemString = 'default:sword_diamond',
+						i_Damage = 8,
+						s_Texture = 'default_tool_diamondsword.png'
+					}
+
+					--[[
+					print(self.given_name .. " new sword: "
+						.. dump(self.weapon))
+					--]]
+				end
+			end
 		end
 	end
 
@@ -1082,49 +1151,6 @@ mobs_humans.Nametag = function(self)
 	end
 end
 
---[[
-
-	Attribution: 'Limit' and 'Calcule Punch Damage' have been taken
-	from 'Creatures MOB-Engine (cme)', on_hitted.lua, by
-	Copyright (C) 2017 Mob API Developers and Contributors
-	Copyright (C) 2015-2016 BlockMen <blockmen2015@gmail.com>
-
-	From the Creatures MOB-Engine (cme) ZLib License (paragraph 1):
-	"If you use this software in a product, an acknowledgment in the
-	product documentation is required."
-
-	Further informations:
-	See also 'Entity damage mechanism' (../minetest/doc/lua_api.txt)
-
---]]
-
--- Limit
-local function limit(value, min, max)
-	if value < min then
-		return min
-	end
-	if value > max then
-		return max
-	end
-	return value
-end
-
-
--- Calcule Punch Damage
-local function calcPunchDamage(obj, actual_interval, tool_caps)
-	local damage = 0
-	if not tool_caps or not actual_interval then
-		return 0
-	end
-	local my_armor = obj:get_armor_groups() or {}
-	for group,_ in pairs(tool_caps.damage_groups) do
-		damage = damage + (tool_caps.damage_groups[group] or 0) *
-			limit(actual_interval / tool_caps.full_punch_interval, 0.0, 1.0) *
-			((my_armor[group] or 0) / 100.0)
-	end
-	return damage or 0
-end
-
 
 mobs_humans.NametagDebug = function(self, hitter, time_from_last_punch,
 	tool_capabilities, direction)
@@ -1141,7 +1167,7 @@ mobs_humans.NametagDebug = function(self, hitter, time_from_last_punch,
 		local i_MobArmor = self.armor
 		local s_PlayerName = hitter:get_player_name()
 		local i_PlayerDamage = tool_capabilities.damage_groups.fleshy
-		local i_ActualDamage = calcPunchDamage(self.object,
+		local i_ActualDamage = mobs_humans.calcPunchDamage(self.object,
 			time_from_last_punch, tool_capabilities)
 
 		local s_Message = s_MobName .. S(' hit by ') .. s_PlayerName

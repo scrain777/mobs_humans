@@ -17,8 +17,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 	- Many customization options via Settings -> All Settings -> Mods -> mobs_humans
 	- Food drop chance on death.
 	- Weapon drop chance on death if killed by a player.
-	- Debug chat message.
-	- Support for 3d_armor, Bonemeal.
+	- Debug chat message (damage math from BlockMen's Creatures MOB-Engine).
+	- Support for 3D Armor, Bonemeal.
 	- Own mesh model.
 	- Weapon draw/sheath.
 

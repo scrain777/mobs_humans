@@ -3,11 +3,11 @@
 **_Adds humans._**
 
 **Version:** 0.4.0  
-**Source code's license:** [EUPL v1.2][1] or later.  
+**Source code's license:** [EUPL v1.2][1] or later, modified zlib-License (cme.lua) see "ZLIB_LICENSE.txt" for details.  
 **Textures' license:** [CC BY-SA v3.0][2], [CC BY-SA v4.0][3]
 
 **Dependencies:** default, farming, flowers (found in [Minetest Game][4]), mobs ([Mobs Redo][5])  
-**Supported:** 3d_armor, bonemeal
+**Supported:** [3D Armor][6], [Bonemeal][7]
 
 
 ### Installation
@@ -31,3 +31,5 @@ https://wiki.minetest.net/Help:Installing_Mods
 [3]: https://creativecommons.org/licenses/by-sa/4.0/
 [4]: https://github.com/minetest/minetest_game
 [5]: https://forum.minetest.net/viewtopic.php?t=9917
+[6]: https://forum.minetest.net/viewtopic.php?t=4654
+[7]: https://forum.minetest.net/viewtopic.php?t=16446
