@@ -11,7 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 
 
-## [0.4.0] - 2019-11-25
+## [0.4.0] - 2019-11-28
 ### Added
 
 	- Many customization options via Settings -> All Settings -> Mods -> mobs_humans
@@ -28,6 +28,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 	- Code split into different files.
 	- Code improvements, bugfixes, additions, etc.
 	- Random values set to realistic chance by default, can be overriden via Options.
+	- Default max armor level: 37 (was 10), same as a 3D Armor diamond suit.
 
 
 

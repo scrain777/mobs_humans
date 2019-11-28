@@ -18,6 +18,41 @@ mobs_humans_max_spawn_height (Humans max spawn height) int 240
 # ITA: Se i mob possono guarire e guadagnare esperienza.
 mobs_humans_dynamic	(Humans heal and gain experience)	bool	false
 
+# ENG: Max armor level.
+# Note: Lower number equals to stronger armor.
+#
+# 100 = No armor, 100% damage taken.
+# 50 = Armor, 50% damage taken.
+# 10 = Strongest armor.
+#
+# COLOR		ARMOR RANGE
+# White:	100-89
+# Green:	88-78
+# Yellow:	77-66
+# Orange:	65-55
+# Red:		54-44
+# Blue:		43-33	(3D Armor diamond suit: 37)
+# Indigo:	32-21
+# Violet:	20-10	(3D Armor diamond suit and shield: 16)
+#
+# ITA: Livello massimo armatura.
+# Nota: Un numero minore corrisponde a un'armatura più forte.
+#
+# 100 = Nessuna armatura, danno ricevuto 100%.
+# 50 = Armatura, danno ricevuto 50%.
+# 10 = Armatura più forte.
+#
+# COLORE		INTERVALLO ARMATURA
+# Bianco:		100-89
+# Verde:		88-78
+# Giallo:		77-66
+# Arancione:	65-55
+# Rosso:		54-44
+# Blu:			43-33	(3D Armor completo diamante: 37)
+# Indaco:		32-21
+# Viola:		20-10	(3D Armor completo diamante e scudo: 16)
+mobs_humans_max_armor (Max armor level, smaller is stronger) int 37
+
 # ENG: Whether if armors and weapons levels must be completely random
 # or based on realistic chance.
 #

@@ -663,7 +663,8 @@ if (mobs_humans.b_DynamicMode == true) then
 		local s_ColorToAppy = ''
 		--print("Armor: " .. a_i_armor)
 
-		if (a_i_armor <= 100) and (a_i_armor >= 89) then
+		if (a_i_armor > 100)
+		or (a_i_armor <= 100) and (a_i_armor >= 89) then
 			s_ColorToAppy = s_White
 			--print("Color: white")
 
@@ -691,7 +692,7 @@ if (mobs_humans.b_DynamicMode == true) then
 			s_ColorToAppy = s_Indigo
 			--print("Color: indigo")
 
-		elseif (a_i_armor < 21) and (a_i_armor >= 10) then
+		elseif (a_i_armor < 21) then
 			s_ColorToAppy = s_Violet
 			--print("Color: violet")
 
@@ -705,7 +706,7 @@ if (mobs_humans.b_DynamicMode == true) then
 		local i_ChosenLevel = nil
 
 		if (mobs_humans.b_REALISTIC_CHANCE == false) then
-			i_ChosenLevel = math.random(10, 100)
+			i_ChosenLevel = math.random(mobs_humans.i_MAX_ARMOR_LEVEL, 100)
 
 		else
 
@@ -781,6 +782,10 @@ if (mobs_humans.b_DynamicMode == true) then
 				i_ChosenLevel = mobs_humans.RandomNumber(85, 100)
 
 			end
+		end
+
+		if (i_ChosenLevel < mobs_humans.i_MAX_ARMOR_LEVEL) then
+			i_ChosenLevel = mobs_humans.i_MAX_ARMOR_LEVEL
 		end
 
 		return i_ChosenLevel

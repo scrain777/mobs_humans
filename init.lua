@@ -96,6 +96,12 @@ end
 
 
 if (mobs_humans.b_DynamicMode == true) then
+	-- Maximum armor level.
+	mobs_humans.i_MAX_ARMOR_LEVEL = tonumber(minetest.settings:get('mobs_humans_max_armor'))
+	if (mobs_humans.i_MAX_ARMOR_LEVEL == nil) then
+		mobs_humans.i_MAX_ARMOR_LEVEL = 37 -- 3D Armor diamond armor suit.
+	end
+
 	-- When the mob can heal.
 	mobs_humans.t_ALLOWED_STATES = {'stand', 'walk'}
 
